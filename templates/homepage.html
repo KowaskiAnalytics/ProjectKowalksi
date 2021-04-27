@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static',    filename='css/homepage.css') }}">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <title>Kowalski Analytics</title>
+</head>
+<body>
+	<div id="backbox"></div>
+	<div id="frontbox"></div>
+	<div id="logocontainer">
+	  	<div id="logo">
+			  <div id="logoorange" ></div>
+			  <div id="logopurple"></div>
+	  	</div>
+		<img id="title" src="{{ url_for('static',    filename='animation/logo.svg') }}" alt="img">
+	</div>
+	<div id="buttons">
+		<a href="{{ url_for('clustercounter.home') }}">
+	  		<div id="clustercounter"></div>
+		</a>
+	  	<div id="pathfinder"></div>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.8/lottie.min.js" integrity="sha512-w58XJ/0dVbEfZVJoJyBUOTMGBWmIW4jEYJSA0898d2L0Ghpum0FvwK7qTuHhkTctApzrchv3Neli+28ajI4+fg==" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="{{ url_for('static',    filename='js/homepage.js') }}"></script>
+</body>	
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/support.css">
+<!--    <link rel="stylesheet" href="{{ url_for('static',    filename='css/home.css') }}">-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <title>ICCC+: Support</title>
+</head>
+<body>
+    <header>
+        <div class="Logo-container">
+            <div id="title">
+               <img id="titleimg" src="{{ url_for('static',    filename='img/title.png') }}" alt="titleimg" />
+            </div>
+        </div>
+        <nav class="support-corner">
+           <h4 class="support-link"><a class="support-link" href="/">Home</a></h4>
+        </nav>
+    </header>
+
+    <img src="{{ url_for('static',    filename='img/supportpage.svg') }}" alt="" id="selectedimg">
+
+    <a class="guide" href="{{ url_for('clustercounter.downloadguide')}}">
+        <input type="image" class="img-top" src="../../static/img/downloadguideneg.png">
+        <input type="image" src="../../static/img/downloadguide.png">
+    </a>
+
+    <a class="excel" href="{{ url_for('clustercounter.downloadexcel')}}">
+        <input type="image" class="img-tope" src="../../static/img/downloadexceltemplateneg.png">
+        <input type="image" src="../../static/img/downloadexceltemplate.png">
+    </a>
+
+    <div id="email">
+        <div id="email1">sam.vanspauwen@student.uhasselt.be</div>
+        <div id="email2">sam.vanspauwen@sund.ku.dk</div>
+    </div>
+
+    <div id="phone">
+        <div>+32 489 34 36 61</div>
+        <div>+45 91 76 92 42</div>
+    </div>
+
+</body>
+</html>

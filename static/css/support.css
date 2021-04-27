@@ -1,0 +1,143 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #342834;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+}
+
+
+#selectedimg{
+    position: absolute;
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+}
+
+header {
+    display: flex;
+    height: 85px;
+    margin: auto;
+    background-color: rgba(51,50,55,0.84);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    width: 100%;
+}
+
+.Logo-container{
+    display: flex;
+    flex: 1;
+    color: #e4e4f1;
+    margin-left: 10px;
+}
+
+
+#titleimg {
+    height: 70px;
+    margin-top: 5px;
+}
+
+.support-corner{
+    background-color: #736875;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+    width: 85px;
+}
+.support-link{
+    color: #e4e4f1;
+    margin-top: 30px ;
+    text-align: center;
+    text-decoration: none;
+
+}
+
+.guide {
+    position: absolute;
+    display: inline-block;
+    width: 20vw;
+    top: 25vw;
+    left: 25.5%;
+    }
+
+.guide input{
+    width: 100%;
+}
+
+.guide .img-top {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    transition: all 0.2s;
+}
+.guide:hover .img-top {
+    display: inline;
+    transition: all 0.2s;
+}
+
+.excel {
+    position: absolute;
+    display: inline-block;
+    width: 20vw;
+    top: 25vw;
+    left: 50.9%;
+    }
+
+.excel input{
+    width: 100%;
+}
+
+.excel .img-tope {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    transition: all 0.2s;
+}
+.excel:hover .img-tope {
+    display: inline;
+    transition: all 0.2s;
+}
+
+#email{
+    position: absolute;
+    width: 20%;
+    top: 25.7vw;
+    left: 80%;
+
+    display: inline-block;
+    background-color: red;
+    background-image: linear-gradient(45deg, black, #342834);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 0.9vw;
+}
+
+#phone{
+    position: absolute;
+    width: 20%;
+    top: 33vw;
+    left: 80%;
+
+    display: inline-block;
+    background-color: red;
+    background-image: linear-gradient(45deg, black, #342834);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 0.9vw;
+}

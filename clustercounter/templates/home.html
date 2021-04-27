@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<!--    <link rel="stylesheet" href="../static/css/home.css">-->
+    <link rel="stylesheet" href="{{ url_for('clustercounter.static',    filename='css/home.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="shortcut icon" href="{{ url_for('clustercounter.static', filename='img/favicon.ico') }}">
+    <title>ICCC+: The Kowalski Edition</title>
+</head>
+
+<body>
+    <header>
+        <div class="Logo-container">
+            <img id="pinguin" src="{{ url_for('clustercounter.static',    filename='img/logo.png') }}" alt="logo" />
+            <div id="title">
+               <img id="titleimg" src="{{ url_for('clustercounter.static',    filename='img/title.png') }}" alt="titleimg" />
+            </div>
+        </div>
+        <nav id="support-corner">
+           <h4 class="support-link"><a class="support-link" href="{{url_for('clustercounter.support')}}"><div id="support-button">Support</div></a></h4>
+        </nav>
+    </header>
+
+    <div id="contentwindow">
+
+        <!-- Input part of the main body -->
+        <div id="variable-boxes">
+            <div class="backboxes" id="fileselect">
+                <p id="openfiletext"> Open file </p>
+                <div class="variable-box" id="fileselectbox">
+                    <div>
+                        <input id="hiddenfileinput" type="file" accept=".czi" style="display: none" />
+                        <input id="file_submit" type="submit" style="display: none">
+                        <input type="button" id="open_file" value="Open file">
+                    </div>
+                    <div id="fileselectbox2">
+                        <h1 id="select_Cchannel">Select cluster channel:</h1>
+                        <div class="idontknow">
+                            <form id="cluster_channel_radio" class="radio">
+                               <input class="radio_input" type="radio" value="0" name="myRadio" id="myRadio1">
+                               <label class="radio_label" for="myRadio1">One</label>
+                               <input class="radio_input" type="radio" value="1" name="myRadio" id="myRadio2">
+                               <label class="radio_label" for="myRadio2">Two</label>
+                               <input class="radio_input" type="radio" value="2" name="myRadio" id="myRadio3">
+                               <label class="radio_label" for="myRadio3">Three</label>
+                            </form>
+                        </div>
+                        <button id="view_image_button_Cluster">View</button>
+                    </div>
+                    <div id="fileselectbox3">
+                        <h1 id="select_AISchl">Select ROI channel:</h1>
+                        <div class="idontknow">
+                            <form id="AIS_channel_radio" class="radio">
+                               <input class="radio_input" type="radio" value="0" name="myAIS" id="myAIS1">
+                               <label class="radio_label" for="myAIS1">One</label>
+                               <input class="radio_input" type="radio" value="1" name="myAIS" id="myAIS2">
+                               <label class="radio_label" for="myAIS2">Two</label>
+                               <input class="radio_input" type="radio" value="2" name="myAIS" id="myAIS3">
+                               <label class="radio_label" for="myAIS3">Three</label>
+                            </form>
+                        </div>
+                        <button id="view_image_button_AIS">View</button>
+                    </div>
+                </div>
+            </div>
+            <div class="backboxes" id="thresholdselect">
+                <p id="threshtext">Modify threshold</p>
+                <div class="variable-box" id="thresholdbox">
+                    <div id="thresholdbox1">
+                        <div class="slidecontainer">
+                            <form class="slider">
+                                <input type="range" min="0" max="255" value="0" class="range" id="myRange">
+                            </form>
+                            <span id="rangeValue"> 0 </span>
+                        </div>
+                        <div class="bottombox">
+                            <p class="slidervalue1">0</p>
+                            <p class="slidervalue2">255</p>
+                        </div>
+                    </div>
+                    <div id="checkboxbox">
+                        <div id="checkboxtext"> Delete all single pixels </div>
+                        <input type="checkbox" id="threshcheck" name="treshcheck">
+                    </div>
+
+                    <button id="view_image_button_thresh">View</button>
+                </div>
+            </div>
+            <div class="splitbox">
+                <button class="ROIselect" id="ManualROIButton">Manual ROI</button>
+                <button class="ROIselect" id="ROIChannelButton"> Use ROI Channel</button>
+                <div class="backboxes" id="bgselect">
+                    <p id="bgtext">Modify sure background</p>
+                    <div class="variable-box" id="bgbox">
+                        <h1 id="numberofdilations">Number of dilations:</h1>
+                        <p class="inputbox">
+                            <span class="input">
+                                <input type="number" id="bgindex" value="0">
+                                <span></span>
+                            </span>
+                        </p>
+                        <button id="view_image_button_bg">View</button>
+                    </div>
+                </div>
+            </div>
+            <div class="backboxes" id="ROIpanel1">
+                <div class="fginbox">
+                    <span id="manualROItext">Click anywhere on the image to outline the region of interest </span>
+                    <button id="submitROIbutton">Finish</button>
+                </div>
+            </div>
+            <div class="backboxes" id="ROIpanel2">
+                <div class="fginbox">
+                    <div id="ROIthreshold">
+                        <p id="ROIthresholdtext">Distance transformation threshold:</p>
+                        <div id="ROIthresholdsliderbox">
+                            <div class="slidecontainer" id="ROIthresholdslidecontainer">
+                                <div class="slider">
+                                    <input type="range" min="0" max="100" value="0" class="range" id="ROIthresholdslider">
+                                </div>
+                                <span id="ROIthresholdvalue"> 0 </span>
+                            </div>
+                            <div class="bottombox" id="ROithresholdbottombox">
+                                <p class="downslidervalue1">0</p>
+                                <p class="downslidervalue2">100</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="ROIdilate">
+                        <p id="ROInumberofdilations">Number of dilations:</p>
+                        <p class="inputbox">
+                            <span class="input">
+                                <input type="number" id="ROIdilateindex" value="0">
+                                <span></span>
+                            </span>
+                        </p>
+                    </div>
+                    <button id="view_image_button_roi"></button>
+                    <button id="submitROIbutton2">Finish</button>
+
+                </div>
+            </div>
+            <div class="backboxes">
+                <p id="fgtext">Modify sure foreground</p>
+                <div class="variable-box" id="fgbox">
+                    <input class="fgoptionsinput" type="radio" value="0" name="myFG" id="fgoption1">
+                    <label rel="panel1" class="fgoptionslabel active" for="fgoption1">Use distance tranformation </label>
+                    <input class="fgoptionsinput" type="radio" value="1" name="myFG" id="fgoption2">
+                    <label rel="panel2" class="fgoptionslabel" for="fgoption2">Use local max peaks</label>
+                </div>
+                <div class="fgpanel active" id="panel1">
+                    <div class="fginbox">
+                        <p id="dttext">Distance transformation threshold:</p>
+                        <div id="sliderbox">
+                            <div class="slidecontainer">
+                                <div class="slider">
+                                    <input type="range" min="0" max="100" value="0" class="range" id="disttransthresh">
+                                </div>
+                                <span id="disttransthreshvalue"> 0 </span>
+                            </div>
+                            <div class="bottombox">
+                                <p class="slidervalue1">0</p>
+                                <p class="slidervalue2">100</p>
+                            </div>
+                        </div>
+                        <div id="erosionbox">
+                            <p id="erosiontext">Number of erosions:</p>
+                            <div class="inputbox">
+                                    <span class="input">
+                                        <input type="number" id="disttranserosion" value="0">
+                                    </span>
+                            </div>
+                        </div>
+                        <button id="view_image_button_fg_dt">View</button>
+                    </div>
+                </div>
+                <div class="fgpanel" id="panel2">
+                    <div class="fginbox">
+                        <span id="fgmaxtext">Minimum distance between maxima:</span>
+                        <div class="inputbox">
+                                <span class="input">
+                                    <input type="number" id="minimumdistance" value="0">
+                                </span>
+                        </div>
+                        <button id="view_image_button_fg_m">View</button>
+                    </div>
+                </div>
+            </div>
+            <div id="buttonbox">
+                <button id="PerformAnalysis">Analyze</button>
+                <button id="PerformAdd">Analyze & Add</button>
+                <button id="optionsbutton">Options</button>
+            </div>
+            <div id="options">
+                <div id="options1">
+                    <div id="pxµmbox">
+                        <span id="pxµm">px/µm:</span>
+                        <div class="inputbox">
+                                <span class="input">
+                                    <input type="number" id="pxµminput" value="0.13" step="0.01">
+                                </span>
+                        </div>
+                    </div>
+                    <div class="optionsright">
+                        <p>
+                            <a href="{{url_for('clustercounter.downloadresults')}}">
+                                <button id="downloadresults">Download Results ></button>
+                            </a>
+                        </p>
+                    </div>
+                    <div class="optionsright">
+                        <button id="clearresults">Clear Results ></button>
+                    </div>
+                    <div class="optionsright">
+                        <p>
+                            <a href="{{url_for('clustercounter.downloadzip')}}">
+                                <button id="downloadzip">Download Images ></button>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image part of the main body -->
+        <div id="imageviewcontainer">
+            <div id="imageviewer">
+                <img src="{{ url_for('clustercounter.static',    filename='img/kowalski.png') }}" alt="" id="selectedimg">
+            </div>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('clustercounter.static',    filename='js/home.js') }}"></script>
+</body>
+</html>
+
