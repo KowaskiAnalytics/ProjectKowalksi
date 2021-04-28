@@ -339,8 +339,6 @@ class ClusterAnalysis:
         elif currentactivatedpanel == '2':
             self.fgarray = self.createfgm(minimumdistance)
         watershedarray = self.createresults(currentactivatedpanel, add, pxum)
-        cv2.imshow("", watershedarray)
-        cv2.waitKey()
         watershedimage = self.arraytoimage(watershedarray)
         return watershedimage
 
