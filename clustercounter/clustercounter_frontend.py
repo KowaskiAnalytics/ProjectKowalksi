@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, send_file, current_app
 import czifile
 from .clustercounter_backend import ClusterAnalysis
 import os
+import json
 
 clustercounter = Blueprint("clustercounter", __name__, static_folder="static", template_folder="templates")
 
@@ -206,4 +207,9 @@ def downloadexcel():
     filename = 'Excel_Template.xlsx'
 
     return send_file(filename_or_fp=path + "\\" + filename, as_attachment=True)
+
+@clustercounter.route('/getcurrentfilelist', methods=["GET"])
+def getcurrentfilelist():
+    currentfilelist = clusteranalysis.viewcurrentfileslist()
+    return json.dumps(currentfilelist)
 

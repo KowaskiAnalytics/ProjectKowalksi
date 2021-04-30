@@ -428,6 +428,22 @@ $(document).ready(function() {
             url: '/clustercounter/downloadresults',
         })
     })
+    $('#viewcurrentfiles').click(function(){
+        $('#currentfiles').addClass('active');
+        $('#currentfileslist').empty()
+        $.ajax({
+            url: '/clustercounter/getcurrentfilelist',
+            type: 'GET',
+            success: function(results) {
+                let currentfileslist = JSON.parse(results)
+                for (index = 0; index < currentfileslist.length; ++index) {
+                    var listdata = currentfileslist[index]
+                    $('#currentfileslist').append("<li class='listitem'>" + listdata + "</li>")
+                }
+
+            }
+        })
+    })
 });
 
 
@@ -454,6 +470,10 @@ $(function() {
     });
 });
 
+// Close current files tab
+$('.exittab').click(function () {
+    $('#currentfiles').removeClass('active')
+})
 
 // Slider threshold
 function rangeSlide(value){
@@ -500,3 +520,8 @@ $("#optionsbutton").click(function() {
     $("#options1").toggle(0);
 })
 
+// window close message
+window.onbeforeunload = confirmExit;
+function confirmExit() {
+  return "You have attempted to leave this page.  If you have made any changes to the fields without clicking the Save button, your changes will be lost.  Are you sure you want to exit this page?";
+}

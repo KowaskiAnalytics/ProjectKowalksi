@@ -1019,3 +1019,51 @@ header {
     color: #e4e4f1;
     background: rgba(76, 36, 115, 0.75)
 }
+
+#viewcurrentfiles {
+    background: #e4e4f1;
+    padding: 5px 20px;
+    border:2px solid #342834;
+    border-radius: 5px;
+    text-decoration:none;
+    font-size: 25px;
+    font-weight:500;
+    color: black;
+    text-align:center;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+    cursor: pointer;
+    outline: none;
+    overflow: hidden;
+}
+#viewcurrentfiles:hover{
+    color: white;
+    background: #4b4750;
+}
+
+#currentfiles {
+    position: absolute;
+    right: 0;
+    height: 100%;
+    width: 30%;
+    background: white;
+    border: 2px solid black;
+    display: none
+}
+
+#currentfiles.active {
+    display: block;
+}
+
+.exittab {
+    font-size: 20px;
+    position: absolute;
+    right: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-right: 20px;
+    padding-left: 20px;
+    cursor: pointer;
+
+}

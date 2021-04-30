@@ -18,7 +18,7 @@
         <div class="Logo-container">
             <img id="pinguin" src="{{ url_for('clustercounter.static',    filename='img/logo.png') }}" alt="logo" />
             <div id="title">
-               <img id="titleimg" src="{{ url_for('clustercounter.static',    filename='img/title.png') }}" alt="titleimg" />
+               <img id="titleimg" src="{{ url_for('clustercounter.static',    filename='img/title.svg') }}" alt="titleimg" />
             </div>
         </div>
         <nav id="support-corner">
@@ -223,6 +223,13 @@
                             </a>
                         </p>
                     </div>
+                    <div class="optionsright">
+                        <p>
+                            <a href="#">
+                                <button id="viewcurrentfiles">View Analyzed Files ></button>
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -233,7 +240,10 @@
                 <img src="{{ url_for('clustercounter.static',    filename='img/kowalski.png') }}" alt="" id="selectedimg">
             </div>
         </div>
-
+        <div id="currentfiles">
+            <div class="exittab">x</div>
+            <ul id="currentfileslist"></ul>
+        </div>
     </div>
 
     <script src="{{ url_for('clustercounter.static',    filename='js/home.js') }}"></script>

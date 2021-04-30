@@ -15,6 +15,8 @@ from functools import lru_cache
 
 global globaldf
 globaldf = pd.DataFrame()
+global currentfileslist
+currentfileslist = []
 
 ## ClusterAnalysis class
 class ClusterAnalysis:
@@ -42,6 +44,8 @@ class ClusterAnalysis:
 
         self.resetROI = None
 
+        self.currentfileslist = []
+
     def arraytoimage(self, array):
         clusterarrayimage = Image.fromarray(array)
         rawBytes = io.BytesIO()
@@ -52,7 +56,9 @@ class ClusterAnalysis:
 
     def cleardf(self):
         global globaldf
+        global currentfileslist
         globaldf = pd.DataFrame()
+        currentfileslist = []
         print("Cleared Results")
 
     def filter_isolated_cells(self, array, struct):
@@ -221,6 +227,8 @@ class ClusterAnalysis:
             data['equivalent_diameter_microns'] = data['equivalent_diameter'] * (float(pxum))
             data.insert(0, str(self.czifile.filename), "")
             data.insert(0, '', "")
+            global currentfileslist
+            currentfileslist.append(self.czifile.filename)
 
             summary = {'infoname': ["",
                                     'number of clusters',
@@ -395,4 +403,9 @@ class ClusterAnalysis:
             attachment_filename=os.path.splitext(self.czifile.filename)[0] + '.zip',
             cache_timeout=-1
         )
+
+    def viewcurrentfileslist(self):
+        global currentfileslist
+        print(currentfileslist)
+        return currentfileslist
 
