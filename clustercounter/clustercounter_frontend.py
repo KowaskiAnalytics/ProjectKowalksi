@@ -198,7 +198,7 @@ def downloadguide():
     path = os.path.join(current_app.root_path, 'clustercounter/documentation')
     filename = 'ICCC_GUIDE.pdf'
 
-    return send_file(filename_or_fp=path + "\\" + filename, as_attachment=True)
+    return send_file(filename_or_fp=path + "/" + filename, as_attachment=True)
 
 
 @clustercounter.route('/downloadexcel')
@@ -206,7 +206,7 @@ def downloadexcel():
     path = os.path.join(current_app.root_path, 'clustercounter/documentation')
     filename = 'Excel_Template.xlsx'
 
-    return send_file(filename_or_fp=path + "\\" + filename, as_attachment=True)
+    return send_file(filename_or_fp=path + "/" + filename, as_attachment=True)
 
 @clustercounter.route('/getcurrentfilelist', methods=["GET"])
 def getcurrentfilelist():
