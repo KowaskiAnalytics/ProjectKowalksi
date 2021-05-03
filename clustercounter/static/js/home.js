@@ -178,7 +178,6 @@ $(document).ready(function() {
         var threshindex = $('#myRange').val();
         var clusterchannelindex = $('input[name="myRadio"]:checked').val();
         coords = coords + "";
-        alert(coords)
 
         $.ajax({
             url: '/clustercounter/getmanualroi',
