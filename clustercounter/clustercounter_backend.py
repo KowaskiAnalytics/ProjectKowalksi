@@ -12,6 +12,7 @@ import os
 import pandas as pd
 from skimage import measure
 from functools import lru_cache
+import czifile
 
 global globaldf
 globaldf = pd.DataFrame()
@@ -45,6 +46,20 @@ class ClusterAnalysis:
         self.resetROI = None
 
         self.currentfileslist = []
+
+    def showrgbimage(self):
+        array = self.czifilearray[0, 0, :, 0, 0, :, :, 0]
+        array = (array / (255)).astype('uint8')
+        r = array[0, :, :]
+        g = array[1, :, :]
+        b = array[2, :, :]
+        array = np.dstack((r, g, b))
+        rgbimage = Image.fromarray(array, 'RGB')
+        rawBytes = io.BytesIO()
+        rgbimage.save(rawBytes, "JPEG")
+        rawBytes.seek(0)
+        image = str(base64.b64encode(rawBytes.read()).decode("utf-8"))
+        return image
 
     def arraytoimage(self, array):
         clusterarrayimage = Image.fromarray(array)
@@ -254,7 +269,7 @@ class ClusterAnalysis:
             globaldf = pd.concat([globaldf, data], axis=1)
 
             print("added data")
-
+        self.watershedimage = watershedarray
         return watershedarray
 
     def showclusterchannel(self, clusterchannelindex):
@@ -270,7 +285,7 @@ class ClusterAnalysis:
 
     def showthreshchannel(self, clusterchannelindex, threshindex, checkbox, ignoreif):
         (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
-        if ignoreif:
+        if ignoreif == '0':
             self.createthresh.cache_clear()
         self.thresharray = self.createthresh(threshindex, checkbox)
         self.resetROI = True
@@ -278,11 +293,12 @@ class ClusterAnalysis:
         return threshimage
 
     def showcutthreshchannel(self, clusterchannelindex, threshindex, checkbox, coords):
-        self.resetROI = False
-        (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
-        self.thresharray = self.createthresh(threshindex, checkbox)
+        if self.resetROI:
+            (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
+            self.thresharray = self.createthresh(threshindex, checkbox)
         coordsnp = np.empty((0, 2), int)
 
+        self.resetROI = False
         while (np.size(coords) > 0):
             coordsnp = np.concatenate((coordsnp, [coords[0:2]]), axis=0)
             coords = np.delete(coords, [0, 1])

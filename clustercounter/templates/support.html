@@ -5,21 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../static/css/support.css">
-<!--    <link rel="stylesheet" href="{{ url_for('static',    filename='css/home.css') }}">-->
+    <link rel="stylesheet" href="{{ url_for('clustercounter.static',    filename='css/support.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('clustercounter.static', filename='img/favicon.ico') }}">
     <title>Project Kowalski: Cluster Counter</title>
 </head>
 <body>
     <header>
         <div class="Logo-container">
+            <a href="/">
+                <img id="pinguin" src="{{ url_for('clustercounter.static',    filename='img/logo.png') }}" alt="logo" />
+            </a>
             <div id="title">
-               <img id="titleimg" src="{{ url_for('static',    filename='img/title.png') }}" alt="titleimg" />
+               <img id="titleimg" src="{{ url_for('clustercounter.static',    filename='img/title.svg') }}" alt="titleimg" />
             </div>
         </div>
         <nav class="support-corner">
-           <h4 class="support-link"><a class="support-link" href="/">Home</a></h4>
+           <h4 class="support-link"><a class="support-link" href="/clustercounter/">Tool</a></h4>
         </nav>
     </header>
 

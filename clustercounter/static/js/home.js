@@ -16,14 +16,14 @@ function updateWidth(){
     rightsquare.css("width", dimension);
     rightsquare.css("height", dimension);
 }
-
 var coords = [];
-
 $(document).ready(function() {
     // Upload czi file to python backend
     $("#file_submit").click(function (event) {
 
         $('#open_file').addClass('processing').val('Processing');
+
+        $('#imagetitle').html($('#hiddenfileinput').val().split('\\').pop())
 
         var form_data = new FormData();
         form_data.append('czifile', $('#hiddenfileinput').prop('files')[0]);
@@ -41,6 +41,7 @@ $(document).ready(function() {
                     setTimeout(function () {
                         $('#open_file').removeClass('active').val("Open File");
                     }, 4000)
+                    document.getElementById('selectedimg').src = 'data:image/jpeg;base64,'+ data;
                 }
 
 
@@ -86,12 +87,13 @@ $(document).ready(function() {
         }
         var threshindex = $('#myRange').val();
         var clusterchannelindex = $('input[name="myRadio"]:checked').val();
+        var donotcreatethresh = '0'
         console.log(threshindex)
         console.log(clusterchannelindex)
 
         $.ajax({
             url: '/clustercounter/viewthreshimage',
-            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, checkbox:checkbox},
+            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, checkbox:checkbox, donotcreatethresh:donotcreatethresh},
             type: 'GET',
             contentType: "image/jpeg",
             success: function(result) {
@@ -101,45 +103,52 @@ $(document).ready(function() {
     })
     // initiate manual ROI select
     $('#ManualROIButton').click(function () {
-        $('#ROIpanel1').slideDown(300, function() {
-                $(this).addClass('active');
-            });
+        $('#ROIpanel1').slideDown(300, function () {
+            $(this).addClass('active');
+        });
         $('#ManualROIButton').addClass('active');
 
-        if ($('#threshcheck').is(":checked")){
+        if ($('#threshcheck').is(":checked")) {
             var checkbox = '1';
         } else {
             var checkbox = '0';
         }
         var threshindex = $('#myRange').val();
         var clusterchannelindex = $('input[name="myRadio"]:checked').val();
-
+        var donotcreatethresh = '1'
+        coords = []
         console.log(threshindex);
         console.log(clusterchannelindex);
 
         $.ajax({
             url: '/clustercounter/viewthreshimage',
-            data: {threshindex: threshindex, clusterchannelindex: clusterchannelindex, checkbox:checkbox},
+            data: {
+                threshindex: threshindex,
+                clusterchannelindex: clusterchannelindex,
+                checkbox: checkbox,
+                donotcreatethresh: donotcreatethresh
+            },
             type: 'GET',
             contentType: "image/jpeg",
             success: function (result) {
                 document.getElementById('selectedimg').src = 'data:image/jpeg;base64,' + result;
             }
         });
-        coords = [];
-        $('#selectedimg').on("click", function (e) {
-            var $img = $(this);
-            var currentClickPosX = e.pageX - $img.offset().left;
-            var currentClickPosY = e.pageY - $img.offset().top;
+    })
+    $('#selectedimg').on("click", function (e) {
+        var $img = $(this);
+        var currentClickPosX = e.pageX - $img.offset().left;
+        var currentClickPosY = e.pageY - $img.offset().top;
 
-            var currentWidth = $img.width();
-            var currentHeight = $img.height();
+        var currentWidth = $img.width();
+        var currentHeight = $img.height();
 
-            var naturalWidth = this.naturalWidth;
-            var naturalHeight = this.naturalHeight;
-            var naturalClickPosX = ((naturalWidth / currentWidth) * currentClickPosX).toFixed(0);
-            var naturalClickPosY = ((naturalHeight / currentHeight) * currentClickPosY).toFixed(0);
+        var naturalWidth = this.naturalWidth;
+        var naturalHeight = this.naturalHeight;
+        var naturalClickPosX = ((naturalWidth / currentWidth) * currentClickPosX).toFixed(0);
+        var naturalClickPosY = ((naturalHeight / currentHeight) * currentClickPosY).toFixed(0);
 
+        if($('#ManualROIButton').hasClass("active")) {
             coords.push([naturalClickPosX, naturalClickPosY]);
 
             $("body").append(
@@ -152,36 +161,37 @@ $(document).ready(function() {
                 borderRadius:'50%',
                 background: 'rgba(76, 36, 115)',
             })
-        );
-        });
-        $('#submitROIbutton').on('click', function(){
-            $('div.ROIdots').remove();
-            $('#ManualROIButton').removeClass('active');
-            $('#ROIpanel1').slideUp(300, function() {
-                    $(this).removeClass('active') });
+            );
+        }
+    });
+    $('#submitROIbutton').on('click', function(){
+        $('div.ROIdots').remove();
+        $('#ManualROIButton').removeClass('active');
+        $('#ROIpanel1').slideUp(300, function() {
+                $(this).removeClass('active') });
 
-            if ($('#threshcheck').is(":checked")){
-                var checkbox = '1'
-            } else {
-                var checkbox = '0'
+        if ($('#threshcheck').is(":checked")){
+            var checkbox = '1'
+        } else {
+            var checkbox = '0'
+        }
+        var threshindex = $('#myRange').val();
+        var clusterchannelindex = $('input[name="myRadio"]:checked').val();
+        coords = coords + "";
+        alert(coords)
+
+        $.ajax({
+            url: '/clustercounter/getmanualroi',
+            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, coords:coords, checkbox:checkbox},
+            type: 'GET',
+            contentType: "image/jpeg",
+            success: function(result) {
+                document.getElementById('selectedimg').src = 'data:image/jpeg;base64,'+ result;
+                $('#ManualROIButton').addClass('success')
+                setTimeout(function () {
+                    $('#ManualROIButton').removeClass('success');
+                }, 4000);
             }
-            var threshindex = $('#myRange').val();
-            var clusterchannelindex = $('input[name="myRadio"]:checked').val();
-            coords = coords + "";
-
-            $.ajax({
-                url: '/clustercounter/getmanualroi',
-                data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, coords:coords, checkbox:checkbox},
-                type: 'GET',
-                contentType: "image/jpeg",
-                success: function(result) {
-                    document.getElementById('selectedimg').src = 'data:image/jpeg;base64,'+ result;
-                    $('#ManualROIButton').addClass('success')
-                    setTimeout(function () {
-                        $('#ManualROIButton').removeClass('success');
-                    }, 4000);
-                }
-            });
         });
     });
     $('#ROIChannelButton').click(function(){
@@ -214,7 +224,7 @@ $(document).ready(function() {
         var ROIdilateindex = $("#ROIdilateindex").val();
 
         $.ajax({
-            url: '/viewroichannel',
+            url: '/clustercounter/viewroichannel',
             data: {aischannelindex:aischannelindex, clusterchannelindex:clusterchannelindex, threshindex:threshindex,
                 ROIthreshindex:ROIthreshindex, ROIdilateindex:ROIdilateindex, checkbox:checkbox},
             type: 'GET',

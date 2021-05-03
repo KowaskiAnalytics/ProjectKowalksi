@@ -43,6 +43,10 @@ header {
     margin-left: 10px;
 }
 
+#pinguin {
+    margin: 0 20px;
+    height: 85px;
+}
 
 #titleimg {
     height: 70px;

@@ -29,7 +29,7 @@ def uploadczi():
         global clusteranalysis
         clusteranalysis = ClusterAnalysis(file, filearray)
 
-    return "", 204
+    return clusteranalysis.showrgbimage()
 
 
 # View/create clusterimage (should include passing the values of radio buttons)
@@ -52,10 +52,11 @@ def viewthreshimage():
     threshindex = request.args["threshindex"]
     clusterchannelindex = request.args["clusterchannelindex"]
     checkbox = request.args["checkbox"]
+    donotcreatethresh = request.args["donotcreatethresh"]
     print(threshindex)
     print(clusterchannelindex)
     global clusteranalysis
-    return clusteranalysis.showthreshchannel(clusterchannelindex, threshindex, checkbox, True)
+    return clusteranalysis.showthreshchannel(clusterchannelindex, threshindex, checkbox, donotcreatethresh)
 
 
 @clustercounter.route("/getmanualroi", methods=["GET", "POST"])
