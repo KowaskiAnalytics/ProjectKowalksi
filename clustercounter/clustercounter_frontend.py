@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, send_file, current_app
+from flask import Blueprint, render_template, request, send_file, current_app, session, redirect, url_for
 import czifile
 from .clustercounter_backend import ClusterAnalysis
 import os
@@ -6,13 +6,17 @@ import json
 
 clustercounter = Blueprint("clustercounter", __name__, static_folder="static", template_folder="templates")
 
-clusteranalysis = None
+clusteranalysis = ClusterAnalysis()
 
-globaldf = None
 
 @clustercounter.route("/")
 def home():
-    return render_template("home.html")
+    if "user" in session:
+        user = session["user"]
+        return render_template("home.html", data=user)
+    else:
+        return redirect(url_for("login"))
+
 
 @clustercounter.route("/support")
 def support():
@@ -26,10 +30,7 @@ def uploadczi():
         file = request.files["czifile"]
         filearray = czifile.imread(file)
 
-        global clusteranalysis
-        clusteranalysis = ClusterAnalysis(file, filearray)
-
-    return clusteranalysis.showrgbimage()
+    return clusteranalysis.showrgbimage(file, filearray)
 
 
 # View/create clusterimage (should include passing the values of radio buttons)

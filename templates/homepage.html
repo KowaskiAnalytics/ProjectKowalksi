@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{{ url_for('static',    filename='css/homepage.css') }}">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script> var user = {{ data|tojson }} </script>
 	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
     <title>Project Kowalski</title>
 </head>
@@ -24,6 +25,10 @@
 		</a>
 	  	<div id="pathfinder"></div>
 	</div>
+    <div id="userbox">
+        <span id="sessionname"></span>
+        <button id="logout">End Session</button>
+    </div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.8/lottie.min.js" integrity="sha512-w58XJ/0dVbEfZVJoJyBUOTMGBWmIW4jEYJSA0898d2L0Ghpum0FvwK7qTuHhkTctApzrchv3Neli+28ajI4+fg==" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="{{ url_for('static',    filename='js/homepage.js') }}"></script>
 </body>	

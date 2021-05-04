@@ -87,3 +87,9 @@ function myScript2CC(){
 	logopurpleanim.play();
 	backbox.style.backgroundColor = "#646161"
 };
+
+$("#sessionname").html("Session ID: "+ user)
+
+$("#logout").click(function (){
+    window.location.href="/logout"
+})

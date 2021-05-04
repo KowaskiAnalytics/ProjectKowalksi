@@ -22,10 +22,10 @@ currentfileslist = []
 ## ClusterAnalysis class
 class ClusterAnalysis:
 
-    def __init__(self, czifile, czifilearray):
+    def __init__(self):
 
-        self.czifile = czifile
-        self.czifilearray = czifilearray
+        self.globaldf = pd.DataFrame()
+        self.currentfileslist = []
 
         self.clusterchannelarray = None
         self.clusterchannelarray8bit = None
@@ -47,7 +47,9 @@ class ClusterAnalysis:
 
         self.currentfileslist = []
 
-    def showrgbimage(self):
+    def showrgbimage(self, czifile, czifilearray):
+        self.czifile = czifile
+        self.czifilearray = czifilearray
         array = self.czifilearray[0, 0, :, 0, 0, :, :, 0]
         array = (array / (255)).astype('uint8')
         r = array[0, :, :]
