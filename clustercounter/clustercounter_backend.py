@@ -1,4 +1,4 @@
-from flask import send_file
+from flask import send_file, jsonify
 from PIL import Image
 import io
 import base64
@@ -12,45 +12,23 @@ import os
 import pandas as pd
 from skimage import measure
 from functools import lru_cache
+from flask import session
 import czifile
-
-global globaldf
-globaldf = pd.DataFrame()
-global currentfileslist
-currentfileslist = []
 
 ## ClusterAnalysis class
 class ClusterAnalysis:
 
     def __init__(self):
 
-        self.globaldf = pd.DataFrame()
-        self.currentfileslist = []
+        session["CC_DataFrame"] = pd.DataFrame()
+        session["CC_currentfileslist"] = []
 
-        self.clusterchannelarray = None
-        self.clusterchannelarray8bit = None
 
-        self.aischannelarray = None
-        self.aischannelarray8bit = None
-
-        self.thresharray = None
-
-        self.thresh_ROI_nn = None
-
-        self.bgarray = None
-        self.bgimage = None
-
-        self.fgarray = None
-        self.fgimage = None
-
-        self.resetROI = None
-
-        self.currentfileslist = []
 
     def showrgbimage(self, czifile, czifilearray):
-        self.czifile = czifile
-        self.czifilearray = czifilearray
-        array = self.czifilearray[0, 0, :, 0, 0, :, :, 0]
+        session["czifilename"] = czifile.filename
+        session["czifilearray"] = czifilearray
+        array = czifilearray[0, 0, :, 0, 0, :, :, 0]
         array = (array / (255)).astype('uint8')
         r = array[0, :, :]
         g = array[1, :, :]
@@ -61,6 +39,7 @@ class ClusterAnalysis:
         rgbimage.save(rawBytes, "JPEG")
         rawBytes.seek(0)
         image = str(base64.b64encode(rawBytes.read()).decode("utf-8"))
+
         return image
 
     def arraytoimage(self, array):
@@ -72,10 +51,8 @@ class ClusterAnalysis:
         return image
 
     def cleardf(self):
-        global globaldf
-        global currentfileslist
-        globaldf = pd.DataFrame()
-        currentfileslist = []
+        session["CC_DataFrame"] = pd.DataFrame()
+        session["CC_currentfileslist"] = []
         print("Cleared Results")
 
     def filter_isolated_cells(self, array, struct):
@@ -92,43 +69,24 @@ class ClusterAnalysis:
         filtered_array[area_mask[id_regions]] = 0
         return filtered_array
 
-    @lru_cache(maxsize=1)
+
     def createclusterchannel(self, clusterchannelindex):
-        clusterchannelarray = self.czifilearray[0, 0, int(clusterchannelindex), 0, 0, :, :, 0]
+        clusterchannelarray = session.get("czifilearray")[0, 0, int(clusterchannelindex), 0, 0, :, :, 0]
         clusterchannelarray8bit = (clusterchannelarray / (255)).astype('uint8')
         print('created cluster channel')
 
-        self.createthresh.cache_clear()
-        self.createbg.cache_clear()
-        self.createfgdt.cache_clear()
-        self.createfgm.cache_clear()
-        self.createresults.cache_clear()
-
         return clusterchannelarray, clusterchannelarray8bit
 
-    @lru_cache(maxsize=1)
     def createaischannel(self, aischannelindex):
-        aischannelarray = self.czifilearray[0, 0, int(aischannelindex), 0, 0, :, :, 0]
+        aischannelarray = session.get("czifilearray")[0, 0, int(aischannelindex), 0, 0, :, :, 0]
         aischannelarray8bit = (aischannelarray / (255)).astype('uint8')
         print('created AIS channel')
 
-        self.createthresh.cache_clear()
-        self.createbg.cache_clear()
-        self.createfgdt.cache_clear()
-        self.createfgm.cache_clear()
-        self.createresults.cache_clear()
-
         return aischannelarray8bit
 
-    @lru_cache(maxsize=1)
     def createthresh(self, threshindex, checkbox, ):
-        ret1, thresharray = cv2.threshold(self.clusterchannelarray8bit, int(threshindex), 255, cv2.THRESH_BINARY)
+        ret1, thresharray = cv2.threshold(session["CC_clusterchannelarray8bit"], int(threshindex), 255, cv2.THRESH_BINARY)
         print("created thresh")
-
-        self.createbg.cache_clear()
-        self.createfgdt.cache_clear()
-        self.createfgm.cache_clear()
-        self.createresults.cache_clear()
 
         if checkbox == '1':
             thresharray = self.filter_isolated_cells(thresharray, struct=np.ones((3, 3)))
@@ -136,65 +94,47 @@ class ClusterAnalysis:
         return thresharray
 
     def createthreshROI(self, coordsnp):
-        mask = np.zeros(self.thresharray.shape[0:2], dtype=np.uint8)
+        mask = np.zeros(session["CC_tresharray"].shape[0:2], dtype=np.uint8)
         cv2.drawContours(mask, [coordsnp], -1, (255, 255, 255), -1, cv2.LINE_AA)
-        self.thresharray = cv2.bitwise_and(self.thresharray, self.thresharray, mask=mask)
+        session["CC_tresharray"] = cv2.bitwise_and(session["CC_tresharray"], session["CC_tresharray"], mask=mask)
         print("created thresh ROi")
 
-        self.createbg.cache_clear()
-        self.createfgdt.cache_clear()
-        self.createfgm.cache_clear()
-        self.createresults.cache_clear()
-
-    @lru_cache(maxsize=1)
     def createthreshROI_RC(self, ROIdilateindex, ROIthreshindex):
-        ret4, thresh_ROI = cv2.threshold(self.aischannelarray8bit,
-                                         ((int(ROIthreshindex)) / 100) * self.aischannelarray8bit.max(), 255, 0)
+        ret4, thresh_ROI = cv2.threshold(session["CC_aischannelarray8bit"],
+                                         ((int(ROIthreshindex)) / 100) * session["CC_aischannelarray8bit"].max(), 255, 0)
         kernel2 = np.ones((3, 3), np.uint8)
         thresh_ROI_nn = cv2.morphologyEx(thresh_ROI, cv2.MORPH_OPEN, kernel2)
         kernel3 = np.ones((3, 3), np.uint8)
         thresh_ROI_nn = cv2.dilate(thresh_ROI_nn, kernel3, iterations=int(ROIdilateindex))
-        self.thresharray[thresh_ROI_nn == 0] = 0
-        thresharray = self.thresharray
+        session["CC_tresharray"][thresh_ROI_nn == 0] = 0
+        thresharray = session["CC_tresharray"]
         print('createdthreshROI_RC')
-
-        self.createbg.cache_clear()
-        self.createfgdt.cache_clear()
-        self.createfgm.cache_clear()
-        self.createresults.cache_clear()
 
         return thresh_ROI_nn, thresharray
 
-    @lru_cache(maxsize=1)
     def createbg(self, bgindex):
         kernel = np.ones((3, 3), np.uint8)
         number_of_dilations = int(bgindex)
-        bgarray = cv2.dilate(self.thresharray, kernel, iterations=number_of_dilations)
+        bgarray = cv2.dilate(session["CC_tresharray"], kernel, iterations=number_of_dilations)
         print('created bg')
-
-        self.createresults.cache_clear()
 
         return bgarray
 
-    @lru_cache(maxsize=1)
     def createfgdt(self, fgindexdtthresh, fgindexdterosion):
 
-        dist_transform = cv2.distanceTransform(self.thresharray, cv2.DIST_L2, 3)
+        dist_transform = cv2.distanceTransform(session["CC_tresharray"], cv2.DIST_L2, 3)
         ret2, sure_fg = cv2.threshold(dist_transform, ((int(fgindexdtthresh)) / 100) * dist_transform.max(), 255, 0)
         kernel1 = np.ones((2, 2), np.uint8)
         sure_fg = cv2.erode(sure_fg, kernel1, iterations=int(fgindexdterosion))
         fgarray = np.uint8(sure_fg)
         print('created fgdt')
 
-        self.createresults.cache_clear()
-
         return fgarray
 
-    @lru_cache(maxsize=1)
     def createfgm(self, minimumdistance):
 
-        cluster_peaks = copy.copy(self.clusterchannelarray8bit)
-        cluster_peaks[self.thresharray == 0] = 0
+        cluster_peaks = copy.copy(session["CC_clusterchannelarray8bit"])
+        cluster_peaks[session["CC_tresharray"] == 0] = 0
         cluster_peaks1 = peak_local_max(cluster_peaks, min_distance=int(minimumdistance))
 
         for i in range(cluster_peaks1.shape[0]):
@@ -203,15 +143,12 @@ class ClusterAnalysis:
         ret2, fgarray = cv2.threshold(cluster_peaks, 254, 255, 0)
         print('created fgm')
 
-        self.createresults.cache_clear()
-
         return fgarray
 
-    @lru_cache(maxsize=1)
     def createresults(self, currentactivatedpanel, add, pxum):
-        watershedarray = cv2.cvtColor(self.clusterchannelarray8bit, cv2.COLOR_GRAY2RGB)
-        unknown = cv2.subtract(self.bgarray, self.fgarray)
-        ret3, markers = cv2.connectedComponents(self.fgarray)
+        watershedarray = cv2.cvtColor(session["CC_clusterchannelarray8bit"], cv2.COLOR_GRAY2RGB)
+        unknown = cv2.subtract(session["CC_bgarray"], session["CC_fgarray"])
+        ret3, markers = cv2.connectedComponents(session["CC_fgarray"])
         print(np.max(markers))
         markers += 10
         markers[unknown == 255] = 0
@@ -220,7 +157,7 @@ class ClusterAnalysis:
             markers = cv2.watershed(watershedarray, markers)
 
         if currentactivatedpanel == '2':
-            thresh = cv2.cvtColor(self.thresharray, cv2.COLOR_GRAY2RGB)
+            thresh = cv2.cvtColor(session["CC_tresharray"], cv2.COLOR_GRAY2RGB)
             markers = cv2.watershed(thresh, markers)
 
         watershedarray[markers == (-1)] = [255, 105, 180]
@@ -228,7 +165,7 @@ class ClusterAnalysis:
         print('created results')
 
         if add:
-            props = measure.regionprops_table(markers, self.clusterchannelarray,
+            props = measure.regionprops_table(markers, session["CC_clusterchannelarray"],
                                               properties=['label',
                                                           'area', 'equivalent_diameter',
                                                           'mean_intensity', 'solidity', 'orientation',
@@ -242,10 +179,9 @@ class ClusterAnalysis:
 
             data['area_sq_microns'] = data['area'] * (float(pxum) ** 2)
             data['equivalent_diameter_microns'] = data['equivalent_diameter'] * (float(pxum))
-            data.insert(0, str(self.czifile.filename), "")
+            data.insert(0, str(session["czifilename"]), "")
             data.insert(0, '', "")
-            global currentfileslist
-            currentfileslist.append(self.czifile.filename)
+            session["CC_currentfileslist"].append(session["czifilename"])
 
             summary = {'infoname': ["",
                                     'number of clusters',
@@ -268,102 +204,101 @@ class ClusterAnalysis:
             print(data)
 
             global globaldf
-            globaldf = pd.concat([globaldf, data], axis=1)
+            session["CC_DataFrame"] = pd.concat([session["CC_DataFrame"], data], axis=1)
 
             print("added data")
-        self.watershedimage = watershedarray
+        session["CC_watershedimage"] = watershedarray
         return watershedarray
 
     def showclusterchannel(self, clusterchannelindex):
-        (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
-        self.resetROI = True
-        clusterchannelimage = self.arraytoimage(self.clusterchannelarray8bit)
+        (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
+        session["CC_resetROI"] = True
+        clusterchannelimage = self.arraytoimage(session["CC_clusterchannelarray8bit"])
         return clusterchannelimage
 
     def showaischannel(self, aischannelindex):
-        (self.aischannelarray8bit) = self.createaischannel(aischannelindex)
-        aischannelimage = self.arraytoimage(self.aischannelarray8bit)
+        (session["CC_aischannelarray8bit"]) = self.createaischannel(aischannelindex)
+        aischannelimage = self.arraytoimage(session["CC_aischannelarray8bit"])
         return aischannelimage
 
     def showthreshchannel(self, clusterchannelindex, threshindex, checkbox, ignoreif):
-        (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
+        (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
         if ignoreif == '0':
-            self.createthresh.cache_clear()
-        self.thresharray = self.createthresh(threshindex, checkbox)
-        self.resetROI = True
-        threshimage = self.arraytoimage(self.thresharray)
+            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+        session["CC_resetROI"] = True
+        threshimage = self.arraytoimage(session["CC_tresharray"])
         return threshimage
 
     def showcutthreshchannel(self, clusterchannelindex, threshindex, checkbox, coords):
-        if self.resetROI:
-            (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
-            self.thresharray = self.createthresh(threshindex, checkbox)
+        if session["CC_resetROI"]:
+            (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
+            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
         coordsnp = np.empty((0, 2), int)
 
-        self.resetROI = False
+        session["CC_resetROI"] = False
         while (np.size(coords) > 0):
             coordsnp = np.concatenate((coordsnp, [coords[0:2]]), axis=0)
             coords = np.delete(coords, [0, 1])
 
         self.createthreshROI(coordsnp)
 
-        threshimage = self.arraytoimage(self.thresharray)
+        threshimage = self.arraytoimage(session["CC_tresharray"])
         return threshimage
 
     def showroichannelcutthreshchannel(self, clusterchannelindex, threshindex, checkbox, aischannelindex,
                                        ROIdilateindex,
                                        ROIthreshindex, viewroi):
-        if self.resetROI:
-            (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
-            self.thresharray = self.createthresh(threshindex, checkbox)
-        self.aischannelarray8bit = self.createaischannel(aischannelindex)
-        (thresh_ROI_nn, self.thresharray) = self.createthreshROI_RC(ROIdilateindex, ROIthreshindex)
+        if session["CC_resetROI"]:
+            (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
+            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+        session["CC_aischannelarray8bit"] = self.createaischannel(aischannelindex)
+        (thresh_ROI_nn, session["CC_tresharray"]) = self.createthreshROI_RC(ROIdilateindex, ROIthreshindex)
 
-        self.resetROI = False
+        session["CC_resetROI"] = False
         if viewroi:
             thresh_ROI_image = self.arraytoimage(thresh_ROI_nn)
             return thresh_ROI_image
         else:
-            threshimage = self.arraytoimage(self.thresharray)
+            threshimage = self.arraytoimage(session["CC_tresharray"])
             return threshimage
 
     def showbgchannel(self, clusterchannelindex, threshindex, checkbox, bgindex):
-        if self.resetROI:
-            (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
-            self.thresharray = self.createthresh(threshindex, checkbox)
-        self.bgarray = self.createbg(bgindex)
+        if session["CC_resetROI"]:
+            (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
+            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+        session["CC_bgarray"] = self.createbg(bgindex)
 
-        bgimage = self.arraytoimage(self.bgarray)
+        bgimage = self.arraytoimage(session["CC_bgarray"])
         return bgimage
 
     def showfgdtchannel(self, clusterchannelindex, threshindex, checkbox, fgindexdtthresh, fgindexdterosion):
-        if self.resetROI:
-            (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
-            self.thresharray = self.createthresh(threshindex, checkbox)
-        self.fgarray = self.createfgdt(fgindexdtthresh, fgindexdterosion)
+        if session["CC_resetROI"]:
+            (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
+            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+        session["CC_fgarray"] = self.createfgdt(fgindexdtthresh, fgindexdterosion)
 
-        fgimage = self.arraytoimage(self.fgarray)
+        fgimage = self.arraytoimage(session["CC_fgarray"])
         return fgimage
 
     def showfgmchannel(self, clusterchannelindex, threshindex, checkbox, minimumdistance):
-        if self.resetROI:
-            (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
-            self.thresharray = self.createthresh(threshindex, checkbox)
-        self.fgarray = self.createfgm(minimumdistance)
+        if session["CC_resetROI"]:
+            (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
+            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+        session["CC_fgarray"] = self.createfgm(minimumdistance)
 
-        fgimage = self.arraytoimage(self.fgarray)
+        fgimage = self.arraytoimage(session["CC_fgarray"])
         return fgimage
 
     def performanalysis(self, currentactivatedpanel, threshindex, clusterchannelindex, bgindex, fgindexdtthresh,
                         fgindexdterosion, minimumdistance, checkbox, add, pxum):
-        if self.resetROI:
-            (self.clusterchannelarray, self.clusterchannelarray8bit) = self.createclusterchannel(clusterchannelindex)
-            self.thresharray = self.createthresh(threshindex, checkbox)
-        self.bgarray = self.createbg(bgindex)
+        if session["CC_resetROI"]:
+            (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
+            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+        session["CC_bgarray"] = self.createbg(bgindex)
         if currentactivatedpanel == '1':
-            self.fgarray = self.createfgdt(fgindexdtthresh, fgindexdterosion)
+            session["CC_fgarray"] = self.createfgdt(fgindexdtthresh, fgindexdterosion)
         elif currentactivatedpanel == '2':
-            self.fgarray = self.createfgm(minimumdistance)
+            session["CC_fgarray"] = self.createfgm(minimumdistance)
         watershedarray = self.createresults(currentactivatedpanel, add, pxum)
         watershedimage = self.arraytoimage(watershedarray)
         return watershedimage
@@ -371,7 +306,7 @@ class ClusterAnalysis:
     def downloadresults(self):
 
         exceldf = io.BytesIO()
-        globaldf.to_excel(exceldf)
+        session["CC_DataFrame"].to_excel(exceldf)
         exceldf.seek(0)  # may not be necessary?
         return send_file(
             exceldf,
@@ -396,9 +331,9 @@ class ClusterAnalysis:
         file_names = ["clusterchannelimage.tiff", "ROIchannelimage.tiff", "threshimage.tiff", "backgroundimage.tiff",
                       "foregroungimage.tiff",
                       "watershedimage.tiff"]
-        images = [self.clusterchannelarray, self.aischannelarray, self.thresharray,
-                  self.bgarray, self.fgarray,
-                  self.watershedimage]
+        images = [session["CC_clusterchannelarray"], session["CC_aisrchannelarray"], session["CC_tresharray"],
+                  session["CC_bgarray"], session["CC_fgarray"],
+                  session["CC_watershedimage"]]
         files = []
 
         for index in range(len(images)):
@@ -418,12 +353,10 @@ class ClusterAnalysis:
             mem_zip,
             mimetype='application/zip',
             as_attachment=True,
-            attachment_filename=os.path.splitext(self.czifile.filename)[0] + '.zip',
+            attachment_filename=os.path.splitext(session["czifilename"])[0] + '.zip',
             cache_timeout=-1
         )
 
     def viewcurrentfileslist(self):
-        global currentfileslist
-        print(currentfileslist)
-        return currentfileslist
+        return session["CC_currentfileslist"]
 

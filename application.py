@@ -1,6 +1,8 @@
 ## Imports
 from flask import Flask, render_template, request, url_for, session, redirect
 from clustercounter.clustercounter_frontend import clustercounter
+import redis
+from flask_session import Session
 
 
 ## Browser session
@@ -8,7 +10,14 @@ from clustercounter.clustercounter_frontend import clustercounter
 application = Flask(__name__)
 application.register_blueprint(clustercounter, url_prefix= "/clustercounter")
 
-application.secret_key = "shhhhh"
+application.secret_key = "OK_This_is_EPIC"
+
+application.config['SESSION_TYPE'] = 'redis'
+application.config['SESSION_PERMANENT'] = False
+application.config['SESSION_USE_SIGNER'] = True
+application.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
+
+server_session = Session(application)
 
 # Homepage
 @application.route("/login", methods= ["POST","GET"])

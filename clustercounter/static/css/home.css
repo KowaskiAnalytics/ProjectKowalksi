@@ -41,6 +41,13 @@ header {
     margin-top: 5px;
 }
 
+#sessionID {
+    margin-right: 130px;
+    color: white;
+    margin-top: 30px;
+
+}
+
 #support-corner{
     position: absolute;
     top: 0;
@@ -1075,3 +1082,4 @@ header {
     height: auto;
     color: white;
 }
+

@@ -9,6 +9,7 @@
 <!--    <link rel="stylesheet" href="../static/css/home.css">-->
     <link rel="stylesheet" href="{{ url_for('clustercounter.static',    filename='css/home.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script> var user = {{ data|tojson }} </script>
     <link rel="shortcut icon" href="{{ url_for('clustercounter.static', filename='img/favicon.ico') }}">
     <title>Project Kowalski: Cluster Counter</title>
 </head>
@@ -23,6 +24,7 @@
                <img id="titleimg" src="{{ url_for('clustercounter.static',    filename='img/title.svg') }}" alt="titleimg" href="/" />
             </div>
         </div>
+        <div id="sessionID"></div>
         <nav id="support-corner">
            <h4 class="support-link"><a class="support-link" href="{{url_for('clustercounter.support')}}"><div id="support-button">Support</div></a></h4>
         </nav>

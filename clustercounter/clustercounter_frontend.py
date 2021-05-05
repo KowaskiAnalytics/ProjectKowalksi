@@ -3,16 +3,17 @@ import czifile
 from .clustercounter_backend import ClusterAnalysis
 import os
 import json
+import pandas as pd
 
 clustercounter = Blueprint("clustercounter", __name__, static_folder="static", template_folder="templates")
-
-clusteranalysis = ClusterAnalysis()
 
 
 @clustercounter.route("/")
 def home():
     if "user" in session:
         user = session["user"]
+        global clusteranalysis
+        clusteranalysis = ClusterAnalysis()
         return render_template("home.html", data=user)
     else:
         return redirect(url_for("login"))
