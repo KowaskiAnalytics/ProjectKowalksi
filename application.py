@@ -15,7 +15,7 @@ application.secret_key = "OK_This_is_EPIC"
 application.config['SESSION_TYPE'] = 'redis'
 application.config['SESSION_PERMANENT'] = False
 application.config['SESSION_USE_SIGNER'] = True
-application.config['SESSION_REDIS'] = redis.from_url('pk-cache.dgyphc.0001.euc1.cache.amazonaws.com:6379')
+application.config['SESSION_REDIS'] = redis.from_url('redis://pk-cache.dgyphc.0001.euc1.cache.amazonaws.com:6379')
 
 server_session = Session(application)
 
@@ -46,5 +46,5 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
 #
-# if __name__ == "__main__":
-#     application.run(host='0.0.0.0', port=8080, debug=True)
+if __name__ == "__main__":
+    application.run(host='0.0.0.0', port=8080, debug=True)
