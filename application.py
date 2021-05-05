@@ -15,7 +15,7 @@ application.secret_key = "OK_This_is_EPIC"
 application.config['SESSION_TYPE'] = 'redis'
 application.config['SESSION_PERMANENT'] = False
 application.config['SESSION_USE_SIGNER'] = True
-application.config['SESSION_REDIS'] = redis.from_url('redis://localhost:6379')
+application.config['SESSION_REDIS'] = redis.from_url('pk-cache.dgyphc.0001.euc1.cache.amazonaws.com:6379')
 
 server_session = Session(application)
 
