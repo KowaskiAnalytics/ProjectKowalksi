@@ -382,7 +382,7 @@ class ClusterAnalysis:
             mem_zip,
             mimetype='application/zip',
             as_attachment=True,
-            attachment_filename=session["sessionname"] + os.path.splitext(session["czifilename"])[0] + '.zip',
+            attachment_filename=session["sessionname"] + "_" + os.path.splitext(session["czifilename"])[0] + '.zip',
             cache_timeout=-1
         )
 
