@@ -11,10 +11,13 @@ clustercounter = Blueprint("clustercounter", __name__, static_folder="static", t
 @clustercounter.route("/")
 def home():
     if "user" in session:
-        user = session["user"]
+        if session["sessionname"] == "":
+            sessionID = session["user"]
+        else:
+            sessionID = session["sessionname"]
         global clusteranalysis
         clusteranalysis = ClusterAnalysis()
-        return render_template("home.html", data=user)
+        return render_template("home.html", data=sessionID)
     else:
         return redirect(url_for("login"))
 
@@ -55,10 +58,11 @@ def viewthreshimage():
     clusterchannelindex = request.args["clusterchannelindex"]
     checkbox = request.args["checkbox"]
     donotcreatethresh = request.args["donotcreatethresh"]
+    analysisoption = request.args["analysisoption"]
     print(threshindex)
     print(clusterchannelindex)
     global clusteranalysis
-    return clusteranalysis.showthreshchannel(clusterchannelindex, threshindex, checkbox, donotcreatethresh)
+    return clusteranalysis.showthreshchannel(clusterchannelindex, threshindex, checkbox, donotcreatethresh, analysisoption)
 
 
 @clustercounter.route("/getmanualroi", methods=["GET", "POST"])
@@ -67,6 +71,7 @@ def getmanualroi():
     clusterchannelindex = request.args["clusterchannelindex"]
     checkbox = request.args["checkbox"]
     coords = request.args["coords"]
+    analysisoption = request.args["analysisoption"]
     print(threshindex)
     print(clusterchannelindex)
     coords = coords.split(",")
@@ -74,7 +79,7 @@ def getmanualroi():
     print(coords)
     print(type(coords))
     global clusteranalysis
-    return clusteranalysis.showcutthreshchannel(clusterchannelindex, threshindex, checkbox, coords)
+    return clusteranalysis.showcutthreshchannel(clusterchannelindex, threshindex, checkbox, coords, analysisoption)
 
 
 @clustercounter.route("/viewroichannel", methods=["GET", "POST"])
@@ -85,10 +90,12 @@ def viewroichannel():
     aischannelindex = request.args["aischannelindex"]
     ROIthreshindex = request.args["ROIthreshindex"]
     ROIdilateindex = request.args["ROIdilateindex"]
+    ROIgaussianindex = request.args["ROIgaussianindex"]
+    analysisoption = request.args["analysisoption"]
 
     global clusteranalysis
     return clusteranalysis.showroichannelcutthreshchannel(clusterchannelindex, threshindex, checkbox, aischannelindex,
-                                                          ROIdilateindex, ROIthreshindex, True)
+                                                          ROIdilateindex, ROIthreshindex, True, analysisoption, ROIgaussianindex)
 
 
 @clustercounter.route("/useroichannel", methods=["GET", "POST"])
@@ -99,10 +106,13 @@ def useroichannel():
     aischannelindex = request.args["aischannelindex"]
     ROIthreshindex = request.args["ROIthreshindex"]
     ROIdilateindex = request.args["ROIdilateindex"]
+    ROIgaussianindex = request.args["ROIgaussianindex"]
+    analysisoption = request.args["analysisoption"]
+
 
     global clusteranalysis
     return clusteranalysis.showroichannelcutthreshchannel(clusterchannelindex, threshindex, checkbox, aischannelindex,
-                                                          ROIdilateindex, ROIthreshindex, False)
+                                                          ROIdilateindex, ROIthreshindex, False, analysisoption, ROIgaussianindex)
 
 
 @clustercounter.route("/viewbgimage", methods=["GET", "POST"])
@@ -153,14 +163,15 @@ def peformanalysis():
     fgindexdtthresh = request.args["fgindexdtthresh"]
     fgindexdterosion = request.args["fgindexdterosion"]
     minimumdistance = request.args["minimumdistance"]
+    analysisoption = request.args["analysisoption"]
 
     global clusteranalysis
     return clusteranalysis.performanalysis(currentactivatedpanel, threshindex, clusterchannelindex, bgindex,
-                                           fgindexdtthresh, fgindexdterosion, minimumdistance, checkbox, False, '')
+                                           fgindexdtthresh, fgindexdterosion, minimumdistance, checkbox, False, '', analysisoption)
 
 
 @clustercounter.route("/performadd", methods=["GET", "POST"])
-def peformanadd():
+def performadd():
     currentactivatedpanel = request.args["currentactivatedpanel"]
     threshindex = request.args["threshindex"]
     clusterchannelindex = request.args["clusterchannelindex"]
@@ -170,10 +181,11 @@ def peformanadd():
     fgindexdterosion = request.args["fgindexdterosion"]
     minimumdistance = request.args["minimumdistance"]
     pxµm = request.args["pxµm"]
+    analysisoption = request.args["analysisoption"]
 
     global clusteranalysis
     return clusteranalysis.performanalysis(currentactivatedpanel, threshindex, clusterchannelindex, bgindex,
-                                           fgindexdtthresh, fgindexdterosion, minimumdistance, checkbox, True, pxµm)
+                                           fgindexdtthresh, fgindexdterosion, minimumdistance, checkbox, True, pxµm, analysisoption)
 
 
 @clustercounter.route("/clearresults", methods=["GET", "POST"])

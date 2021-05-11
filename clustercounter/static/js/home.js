@@ -116,6 +116,7 @@ $(document).ready(function() {
         var threshindex = $('#myRange').val();
         var clusterchannelindex = $('input[name="myRadio"]:checked').val();
         var donotcreatethresh = '1'
+        var analysisoption = $('input[name="myAN"]:checked').val();
         coords = []
         console.log(threshindex);
         console.log(clusterchannelindex);
@@ -126,7 +127,8 @@ $(document).ready(function() {
                 threshindex: threshindex,
                 clusterchannelindex: clusterchannelindex,
                 checkbox: checkbox,
-                donotcreatethresh: donotcreatethresh
+                donotcreatethresh: donotcreatethresh,
+                analysisoption: analysisoption
             },
             type: 'GET',
             contentType: "image/jpeg",
@@ -177,11 +179,12 @@ $(document).ready(function() {
         }
         var threshindex = $('#myRange').val();
         var clusterchannelindex = $('input[name="myRadio"]:checked').val();
+        var analysisoption = $('input[name="myAN"]:checked').val();
         coords = coords + "";
 
         $.ajax({
             url: '/clustercounter/getmanualroi',
-            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, coords:coords, checkbox:checkbox},
+            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, coords:coords, checkbox:checkbox, analysisoption:analysisoption},
             type: 'GET',
             contentType: "image/jpeg",
             success: function(result) {
@@ -221,11 +224,14 @@ $(document).ready(function() {
         var clusterchannelindex = $('input[name="myRadio"]:checked').val();
         var ROIthreshindex = $('#ROIthresholdslider').val();
         var ROIdilateindex = $("#ROIdilateindex").val();
+        var ROIgaussianindex = $("#ROIgaussianindex").val();
+        var analysisoption = $('input[name="myAN"]:checked').val();
 
         $.ajax({
             url: '/clustercounter/viewroichannel',
             data: {aischannelindex:aischannelindex, clusterchannelindex:clusterchannelindex, threshindex:threshindex,
-                ROIthreshindex:ROIthreshindex, ROIdilateindex:ROIdilateindex, checkbox:checkbox},
+                ROIthreshindex:ROIthreshindex, ROIdilateindex:ROIdilateindex, checkbox:checkbox, analysisoption:analysisoption,
+                ROIgaussianindex:ROIgaussianindex},
             type: 'GET',
             success: function(result) {
                 document.getElementById('selectedimg').src = 'data:image/jpeg;base64,'+ result;
@@ -247,11 +253,14 @@ $(document).ready(function() {
         var clusterchannelindex = $('input[name="myRadio"]:checked').val();
         var ROIthreshindex = $('#ROIthresholdslider').val();
         var ROIdilateindex = $("#ROIdilateindex").val();
+        var analysisoption = $('input[name="myAN"]:checked').val();
+        var ROIgaussianindex = $("#ROIgaussianindex").val();
 
         $.ajax({
             url: '/clustercounter/useroichannel',
             data: {aischannelindex:aischannelindex, clusterchannelindex:clusterchannelindex, threshindex:threshindex,
-                ROIthreshindex:ROIthreshindex, ROIdilateindex:ROIdilateindex, checkbox:checkbox},
+                ROIthreshindex:ROIthreshindex, ROIdilateindex:ROIdilateindex, checkbox:checkbox, analysisoption:analysisoption,
+                ROIgaussianindex:ROIgaussianindex},
             type: 'GET',
             success: function(result) {
                 document.getElementById('selectedimg').src = 'data:image/jpeg;base64,'+ result;
@@ -355,6 +364,7 @@ $(document).ready(function() {
         var fgindexdtthresh = $('#disttransthresh').val();
         var fgindexdterosion = $('#disttranserosion').val();
         var minimumdistance = $('#minimumdistance').val();
+        var analysisoption = $('input[name="myAN"]:checked').val();
 
         $.ajax({
             url: '/clustercounter/performanalysis',
@@ -365,7 +375,8 @@ $(document).ready(function() {
                     fgindexdtthresh:fgindexdtthresh,
                     fgindexdterosion:fgindexdterosion,
                     minimumdistance:minimumdistance,
-                    checkbox:checkbox},
+                    checkbox:checkbox,
+                    analysisoption:analysisoption},
             type: 'GET',
             contentType: "image/jpeg",
             success: function(result) {
@@ -396,6 +407,7 @@ $(document).ready(function() {
         var fgindexdterosion = $('#disttranserosion').val();
         var minimumdistance = $('#minimumdistance').val();
         var pxµm = $('#pxµminput').val();
+        var analysisoption = $('input[name="myAN"]:checked').val();
 
         $.ajax({
             url: '/clustercounter/performadd',
@@ -407,7 +419,8 @@ $(document).ready(function() {
                     fgindexdterosion:fgindexdterosion,
                     minimumdistance:minimumdistance,
                     checkbox:checkbox,
-                    pxµm:pxµm},
+                    pxµm:pxµm,
+                    analysisoption:analysisoption},
             type: 'GET',
             contentType: "image/jpeg",
             success: function(result) {
@@ -455,6 +468,32 @@ $(document).ready(function() {
     })
 });
 
+$(function() {
+
+    $('.anoptionslabel').on('click', function() {
+        $('.anoptionslabel.active').removeClass('active');
+        $(this).addClass('active');
+
+        //figure out which panel to show
+        var panelToShow = $(this).attr('rel');
+
+        //hide current panel
+        // $('.fgpanel.active').slideUp(300, showNextPanel);
+
+        if (panelToShow == 'panel2') {
+            $("#thresholdselect").addClass('inactive')
+            $("#bgselect").addClass('inactive')
+            $("#fgselect").addClass('inactive')
+            $(".ROIselect").addClass('inactive')
+        }
+        if (panelToShow == 'panel1') {
+            $("#thresholdselect").removeClass('inactive')
+            $("#bgselect").removeClass('inactive')
+            $("#fgselect").removeClass('inactive')
+            $(".ROIselect").removeClass('inactive')
+        }
+    });
+});
 
 $(function() {
 

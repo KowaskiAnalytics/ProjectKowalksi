@@ -72,6 +72,15 @@
                     </div>
                 </div>
             </div>
+             <div class="backboxes" id="analysisoptions">
+                <p id="analysisoptionstext">Analysis options</p>
+                <div class="variable-box" id="analysisoptionsbox">
+                    <input class="anoptionsinput" type="radio" value="0" name="myAN" id="anoption1">
+                    <label rel="panel1" class="anoptionslabel active" for="anoption1">Cluster analysis </label>
+                    <input class="anoptionsinput" type="radio" value="1" name="myAN" id="anoption2">
+                    <label rel="panel2" class="anoptionslabel" for="anoption2">Whole 2D area analysis</label>
+                </div>
+            </div>
             <div class="backboxes" id="thresholdselect">
                 <p id="threshtext">Modify threshold</p>
                 <div class="variable-box" id="thresholdbox">
@@ -121,7 +130,7 @@
             <div class="backboxes" id="ROIpanel2">
                 <div class="fginbox">
                     <div id="ROIthreshold">
-                        <p id="ROIthresholdtext">Distance transformation threshold:</p>
+                        <p id="ROIthresholdtext">Threshold:</p>
                         <div id="ROIthresholdsliderbox">
                             <div class="slidecontainer" id="ROIthresholdslidecontainer">
                                 <div class="slider">
@@ -136,20 +145,31 @@
                         </div>
                     </div>
                     <div id="ROIdilate">
-                        <p id="ROInumberofdilations">Number of dilations:</p>
-                        <p class="inputbox">
-                            <span class="input">
-                                <input type="number" id="ROIdilateindex" value="0">
-                                <span></span>
-                            </span>
-                        </p>
+                        <div id="ROIdilatetopbox">
+                            <p id="ROInumberofdilations">Number of dilations:</p>
+                            <p class="inputbox">
+                                <span class="input">
+                                    <input type="number" id="ROIdilateindex" value="0">
+                                    <span></span>
+                                </span>
+                            </p>
+                        </div>
+                        <div id="ROIdilatebottombox">
+                            <p id="ROInumberofsigma">Gaussian blur sigma:</p>
+                            <p class="inputbox">
+                                <span class="input">
+                                    <input type="number" id="ROIgaussianindex" value="6">
+                                    <span></span>
+                                </span>
+                            </p>
+                        </div>
                     </div>
                     <button id="view_image_button_roi"></button>
                     <button id="submitROIbutton2">Finish</button>
 
                 </div>
             </div>
-            <div class="backboxes">
+            <div class="backboxes" id="fgselect">
                 <p id="fgtext">Modify sure foreground</p>
                 <div class="variable-box" id="fgbox">
                     <input class="fgoptionsinput" type="radio" value="0" name="myFG" id="fgoption1">

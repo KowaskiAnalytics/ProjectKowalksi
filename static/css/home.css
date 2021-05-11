@@ -1019,3 +1019,18 @@ header {
     color: #e4e4f1;
     background: rgba(76, 36, 115, 0.75)
 }
+
+#thresholdselect.inactive{
+    display: none;
+}
+
+#bgselect.inactive{
+    display: none;
+}
+
+#fgselect.inactive{
+    display: none;
+}
+
+
+

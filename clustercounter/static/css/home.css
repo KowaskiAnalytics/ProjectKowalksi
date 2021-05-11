@@ -245,6 +245,38 @@ header {
     color: black;
 }
 
+.anoptionsinput {
+    display: none;
+}
+
+#analysisoptionsbox {
+    display: flex;
+}
+
+.anoptionslabel {
+    display: flex;
+    flex: 1;
+    background: transparent;
+    margin: 7px 7px 7px 7px;
+    border:2px solid #e4e4f1;
+    border-radius:0.12em;
+    text-decoration:none;
+    font-size: 20px;
+    font-weight:500;
+    color:#e4e4f1;
+    text-align:center;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+    cursor: pointer;
+    outline: none;
+}
+
+.anoptionslabel.active {
+    color:#000000;
+    background-color:#e4e4f1;
+}
+
 #thresholdbox1 {
     position: relative;
     flex: 1;
@@ -394,6 +426,10 @@ header {
     background-color:#e4e4f1;
 }
 
+.ROIselect.inactive{
+    width: 50%
+}
+
 #ManualROIButton.active {
     background: #d2bc43;
     color: white;
@@ -476,6 +512,7 @@ header {
 }
 
 #ROIthreshold{
+    flex: 1;
     margin-left: 10px;
     margin-right: 5px;
 }
@@ -530,11 +567,31 @@ header {
 }
 
 #ROIdilate {
-    display: flex;
+    margin-right: 200px;
+    height: 85px;
+    padding-top: 15px;
     border-left: 2px dashed #e4e4f1;
 }
 
+
+#ROIdilatetopbox {
+    display: flex;
+}
+
+#ROIdilatebottombox{
+    display: flex;
+}
+
 #ROInumberofdilations {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 5px;
+    font-size: 20px;
+    color: #e4e4f1;
+}
+
+#ROInumberofsigma {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1083,3 +1140,20 @@ header {
     color: white;
 }
 
+#optionsbutton:hover{
+    color: #e4e4f1;
+    background: rgba(76, 36, 115, 0.75)
+}
+
+#thresholdselect.inactive{
+    display: none;
+}
+
+#bgselect.inactive{
+    display: none;
+    flex: 0;
+}
+
+#fgselect.inactive{
+    display: none;
+}

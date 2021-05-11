@@ -15,25 +15,50 @@
         <img id="title" src="{{ url_for('static',    filename='img/login.svg') }}" alt="img">
 
         <div id="statusbox">
-            <h1>Dear User,</h1>
-            <p id="statusboxp">
-                We do not like storing any personal or sensitive data and will therefore not ask you to
-                make an account to use Project Kowalski. However, to keep all the data on our servers nicely organized,
-                we ask you to set a session ID before starting using any of our tools. By attaching all your data to
-                your session ID, we avoid any accidental data cross-over between users. Even though your data will be
-                attached and saved under your session ID on our servers, we do not keep your data. Once you end your
-                session or close your browser, your session ID and ALL corresponding data will be deleted on our end.
-                Please make sure you download all the data
-                you need before ending the session.
-            </p>
+{#            <h1>Dear User,</h1>#}
+{#            <p id="statusboxp">#}
+{#                We do not like storing any personal or sensitive data and will therefore not ask you to#}
+{#                make an account to use Project Kowalski. However, to keep all the data on our servers nicely organized,#}
+{#                we ask you to set a session ID before starting using any of our tools. By attaching all your data to#}
+{#                your session ID, we avoid any accidental data cross-over between users. Even though your data will be#}
+{#                attached and saved under your session ID on our servers, we do not keep your data. Once you end your#}
+{#                session or close your browser, your session ID and ALL corresponding data will be deleted on our end.#}
+{#                Please make sure you download all the data#}
+{#                you need before ending the session.#}
+{#            </p>#}
             <div id="sessionIDbox">
-                <div id="setsessionID">Set Session ID:</div>
-                <form id="sessionIDform" action="{{ url_for('login') }}" method="post">
-                    <input id="forminputtext" type="text" name="sessionname" placeholder="Enter Session ID Here">
-                    <input id="forminputsubmit" type="submit" value="Submit">
-                </form>
+
+                <div class="setsession">Session name:</div>
+                <input id="forminputtext" type="text" name="sessionname" placeholder="Enter session name here">
+                <div class="setsession">Session description:</div>
+                <textarea id="forminputdescription" name="sessiondescription" placeholder="Enter session description here"></textarea>
+                <input id="forminputsubmit" type="submit" value="Continue">
+
+                <button id="submitID">Continue</button>
             </div>
         </div>
     </div>
 </body>
+<script type="text/javascript">
+    $("#submitID").click(function () {
+        var form = document.createElement("form");
+        var element1 = document.createElement("input");
+        var element2 = document.createElement("input");
+
+        form.method = "POST";
+        form.action = "{{ url_for('login') }}";
+
+        element1.value=$("#forminputtext").val();
+        element1.name="sessionname";
+        form.appendChild(element1);
+
+        element2.value=$("#forminputdescription").val();
+        element2.name="sessiondescription";
+        form.appendChild(element2);
+
+        document.body.appendChild(form);
+
+        form.submit();
+    })
+</script>
 </html>

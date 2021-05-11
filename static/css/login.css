@@ -107,45 +107,42 @@ body {
 	color: white;
 	line-height: 3;
 }
-#statusboxp {
-	font-size: 25px;
-	line-height: 150%;
-	text-align: justify;
-}
 
-#sessionIDbox {
-	display: flex;
-}
-
-#sessionIDform {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-}
-
-#setsessionID {
-	font-size: 30px;
+.setsession {
+	font-size: 35px;
 	color: white;
 }
 
 #forminputtext {
-	margin: 0;
-	position: relative;
-	top: 50%;
-	-ms-transform: translateY(-50%);
-	transform: translateY(-50%);
-	font-size: 30px;
+	font-size: 35px;
+	margin-bottom: 35px;
 }
 
-#forminputsubmit {
-	margin: 0;
-	position: relative;
-	top: 50%;
-	-ms-transform: translateY(-50%);
-	transform: translateY(-50%);
-	font-size: 30px;
-	height: 35px;
-	padding: 0 20px;
+#forminputdescription {
+	font-size:  35px;
+	width: 40vw;
+	height: 15vw;
+}
+
+#forminputsubmit{
+	display: none;
+}
+
+#submitID{
+	margin-top: 35px;
+	background: transparent;
+	border: solid 2px white;
+	color: white;
+	font-size: 40px;
+	padding: 0 10px;
+	border-radius: 5px;
+	transition: all 0.2s;
+	cursor: pointer;
+}
+
+#submitID:hover {
+	background: white;
+	color: #171717
 }
 
 .colortext {

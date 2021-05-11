@@ -79,6 +79,7 @@ class ClusterAnalysis:
 
     def createaischannel(self, aischannelindex):
         aischannelarray = session.get("czifilearray")[0, 0, int(aischannelindex), 0, 0, :, :, 0]
+        session["CC_aischannelarray"] = aischannelarray
         aischannelarray8bit = (aischannelarray / (255)).astype('uint8')
         print('created AIS channel')
 
@@ -93,15 +94,20 @@ class ClusterAnalysis:
 
         return thresharray
 
-    def createthreshROI(self, coordsnp):
+    def createthreshROI(self, coordsnp, analysisoption):
         mask = np.zeros(session["CC_tresharray"].shape[0:2], dtype=np.uint8)
         cv2.drawContours(mask, [coordsnp], -1, (255, 255, 255), -1, cv2.LINE_AA)
-        session["CC_tresharray"] = cv2.bitwise_and(session["CC_tresharray"], session["CC_tresharray"], mask=mask)
+        if analysisoption == '1':
+            session["CC_tresharray"] = cv2.bitwise_and(session["CC_clusterchannelarray8bit"], session["CC_clusterchannelarray8bit"], mask=mask)
+
+        else:
+            session["CC_tresharray"] = cv2.bitwise_and(session["CC_tresharray"], session["CC_tresharray"], mask=mask)
         print("created thresh ROi")
 
-    def createthreshROI_RC(self, ROIdilateindex, ROIthreshindex):
-        ret4, thresh_ROI = cv2.threshold(session["CC_aischannelarray8bit"],
-                                         ((int(ROIthreshindex)) / 100) * session["CC_aischannelarray8bit"].max(), 255, 0)
+    def createthreshROI_RC(self, ROIdilateindex, ROIthreshindex, analysisoption, ROIgaussianindex):
+        blurredROIarray = cv2.GaussianBlur(session["CC_aischannelarray8bit"], (0, 0), int(ROIgaussianindex))
+        ret4, thresh_ROI = cv2.threshold(blurredROIarray,
+                                         ((int(ROIthreshindex)) / 100) * blurredROIarray.max(), 255, 0)
         kernel2 = np.ones((3, 3), np.uint8)
         thresh_ROI_nn = cv2.morphologyEx(thresh_ROI, cv2.MORPH_OPEN, kernel2)
         kernel3 = np.ones((3, 3), np.uint8)
@@ -145,22 +151,36 @@ class ClusterAnalysis:
 
         return fgarray
 
-    def createresults(self, currentactivatedpanel, add, pxum):
+    def createresults(self, currentactivatedpanel, add, pxum, analysisoption):
         watershedarray = cv2.cvtColor(session["CC_clusterchannelarray8bit"], cv2.COLOR_GRAY2RGB)
-        unknown = cv2.subtract(session["CC_bgarray"], session["CC_fgarray"])
-        ret3, markers = cv2.connectedComponents(session["CC_fgarray"])
-        print(np.max(markers))
-        markers += 10
-        markers[unknown == 255] = 0
+        if analysisoption == '1':
+            markers = np.ones(session['CC_tresharray'].shape, dtype=np.uint8)
+            markers[session['CC_tresharray'] == 0] = 0
+            mask = copy.copy(markers)
+            markers = markers + 10
+            ctns = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+            ctns = ctns[0] if len(ctns) == 2 else ctns[1]
+            for c in ctns:
+                cv2.drawContours(mask, [c], -1, 255, 1)
+            watershedarray[mask == 255] = [255, 105, 180]
+            print(np.shape(mask))
 
-        if currentactivatedpanel == '1':
-            markers = cv2.watershed(watershedarray, markers)
+        else:
+            unknown = cv2.subtract(session["CC_bgarray"], session["CC_fgarray"])
+            ret3, markers = cv2.connectedComponents(session["CC_fgarray"])
+            print(np.max(markers))
+            markers += 10
+            markers[unknown == 255] = 0
 
-        if currentactivatedpanel == '2':
-            thresh = cv2.cvtColor(session["CC_tresharray"], cv2.COLOR_GRAY2RGB)
-            markers = cv2.watershed(thresh, markers)
+            if currentactivatedpanel == '1':
+                markers = cv2.watershed(watershedarray, markers)
 
-        watershedarray[markers == (-1)] = [255, 105, 180]
+            if currentactivatedpanel == '2':
+                thresh = cv2.cvtColor(session["CC_tresharray"], cv2.COLOR_GRAY2RGB)
+                markers = cv2.watershed(thresh, markers)
+
+            watershedarray[markers == (-1)] = [255, 105, 180]
+
         print(np.shape(watershedarray))
         print('created results')
 
@@ -170,6 +190,7 @@ class ClusterAnalysis:
                                                           'area', 'equivalent_diameter',
                                                           'mean_intensity', 'solidity', 'orientation',
                                                           'perimeter'])
+
 
             data = pd.DataFrame(props)
 
@@ -221,15 +242,19 @@ class ClusterAnalysis:
         aischannelimage = self.arraytoimage(session["CC_aischannelarray8bit"])
         return aischannelimage
 
-    def showthreshchannel(self, clusterchannelindex, threshindex, checkbox, ignoreif):
+    def showthreshchannel(self, clusterchannelindex, threshindex, checkbox, ignoreif, analysisoption):
         (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
-        if ignoreif == '0':
-            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
-        session["CC_resetROI"] = True
-        threshimage = self.arraytoimage(session["CC_tresharray"])
-        return threshimage
+        if analysisoption =='1':
+            threshimage = self.arraytoimage(session["CC_clusterchannelarray8bit"])
+            return threshimage
+        else:
+            if ignoreif == '0':
+                session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+            session["CC_resetROI"] = True
+            threshimage = self.arraytoimage(session["CC_tresharray"])
+            return threshimage
 
-    def showcutthreshchannel(self, clusterchannelindex, threshindex, checkbox, coords):
+    def showcutthreshchannel(self, clusterchannelindex, threshindex, checkbox, coords, analysisoption):
         if session["CC_resetROI"]:
             (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
             session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
@@ -240,19 +265,22 @@ class ClusterAnalysis:
             coordsnp = np.concatenate((coordsnp, [coords[0:2]]), axis=0)
             coords = np.delete(coords, [0, 1])
 
-        self.createthreshROI(coordsnp)
+        self.createthreshROI(coordsnp, analysisoption)
 
         threshimage = self.arraytoimage(session["CC_tresharray"])
         return threshimage
 
     def showroichannelcutthreshchannel(self, clusterchannelindex, threshindex, checkbox, aischannelindex,
                                        ROIdilateindex,
-                                       ROIthreshindex, viewroi):
+                                       ROIthreshindex, viewroi, analysisoption, ROIgaussianindex):
         if session["CC_resetROI"]:
             (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
-            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+            if analysisoption == '1':
+                session["CC_tresharray"] = session["CC_clusterchannelarray8bit"]
+            else:
+                session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
         session["CC_aischannelarray8bit"] = self.createaischannel(aischannelindex)
-        (thresh_ROI_nn, session["CC_tresharray"]) = self.createthreshROI_RC(ROIdilateindex, ROIthreshindex)
+        (thresh_ROI_nn, session["CC_tresharray"]) = self.createthreshROI_RC(ROIdilateindex, ROIthreshindex, analysisoption, ROIgaussianindex)
 
         session["CC_resetROI"] = False
         if viewroi:
@@ -290,16 +318,17 @@ class ClusterAnalysis:
         return fgimage
 
     def performanalysis(self, currentactivatedpanel, threshindex, clusterchannelindex, bgindex, fgindexdtthresh,
-                        fgindexdterosion, minimumdistance, checkbox, add, pxum):
+                        fgindexdterosion, minimumdistance, checkbox, add, pxum, analysisoption):
         if session["CC_resetROI"]:
             (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
             session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
-        session["CC_bgarray"] = self.createbg(bgindex)
-        if currentactivatedpanel == '1':
-            session["CC_fgarray"] = self.createfgdt(fgindexdtthresh, fgindexdterosion)
-        elif currentactivatedpanel == '2':
-            session["CC_fgarray"] = self.createfgm(minimumdistance)
-        watershedarray = self.createresults(currentactivatedpanel, add, pxum)
+        if analysisoption == '0':
+            session["CC_bgarray"] = self.createbg(bgindex)
+            if currentactivatedpanel == '1':
+                session["CC_fgarray"] = self.createfgdt(fgindexdtthresh, fgindexdterosion)
+            elif currentactivatedpanel == '2':
+                session["CC_fgarray"] = self.createfgm(minimumdistance)
+        watershedarray = self.createresults(currentactivatedpanel, add, pxum, analysisoption)
         watershedimage = self.arraytoimage(watershedarray)
         return watershedimage
 
@@ -312,7 +341,7 @@ class ClusterAnalysis:
             exceldf,
             mimetype='application/vnd.ms-excel',
             as_attachment=True,
-            attachment_filename='data.xlsx',
+            attachment_filename= session["sessionname"]+'.xlsx',
             cache_timeout=-1
         )
 
@@ -329,11 +358,11 @@ class ClusterAnalysis:
             return imagebytes
 
         file_names = ["clusterchannelimage.tiff", "ROIchannelimage.tiff", "threshimage.tiff", "backgroundimage.tiff",
-                      "foregroungimage.tiff",
+                      "foregroundimage.tiff",
                       "watershedimage.tiff"]
-        images = [session["CC_clusterchannelarray"], session["CC_aisrchannelarray"], session["CC_tresharray"],
-                  session["CC_bgarray"], session["CC_fgarray"],
-                  session["CC_watershedimage"]]
+        images = [session.get("CC_clusterchannelarray"), session.get("CC_aischannelarray"), session.get("CC_tresharray"),
+                  session.get("CC_bgarray"), session.get("CC_fgarray"),
+                  session.get("CC_watershedimage")]
         files = []
 
         for index in range(len(images)):
@@ -353,7 +382,7 @@ class ClusterAnalysis:
             mem_zip,
             mimetype='application/zip',
             as_attachment=True,
-            attachment_filename=os.path.splitext(session["czifilename"])[0] + '.zip',
+            attachment_filename=session["sessionname"] + os.path.splitext(session["czifilename"])[0] + '.zip',
             cache_timeout=-1
         )
 
