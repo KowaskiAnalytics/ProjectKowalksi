@@ -21,6 +21,7 @@ application.config['SESSION_REDIS'] = redis.from_url('redis://pk-cache.dgyphc.00
 
 server_session = Session(application)
 
+
 # Homepage
 @application.route("/login", methods= ["POST","GET"])
 def login():

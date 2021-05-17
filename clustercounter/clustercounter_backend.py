@@ -40,6 +40,20 @@ class ClusterAnalysis:
         rawBytes.seek(0)
         image = str(base64.b64encode(rawBytes.read()).decode("utf-8"))
 
+        # if session.get("CC_thresharray") is not "":
+        session.pop("CC_clusterchannelarray", None)
+        session.pop("CC_clusterchannelarray8bit", None)
+        session.pop("CC_aischannelarray8bit", None)
+        session.pop("CC_tresharray", None)
+        session.pop("CC_resetROI", None)
+        session.pop("CC_thresh_ROI_nn", None)
+        session.pop("CC_bgarray", None)
+        session.pop("CC_fgarray", None)
+        session.pop("CC_watershedimage", None)
+        session.pop("CC_coordsmask", None)
+
+        session["CC_resetROI"] = True
+
         return image
 
     def arraytoimage(self, array):
@@ -102,6 +116,8 @@ class ClusterAnalysis:
 
         else:
             session["CC_tresharray"] = cv2.bitwise_and(session["CC_tresharray"], session["CC_tresharray"], mask=mask)
+
+        session["CC_coordsmask"] = mask
         print("created thresh ROi")
 
     def createthreshROI_RC(self, ROIdilateindex, ROIthreshindex, analysisoption, ROIgaussianindex):
@@ -112,11 +128,12 @@ class ClusterAnalysis:
         thresh_ROI_nn = cv2.morphologyEx(thresh_ROI, cv2.MORPH_OPEN, kernel2)
         kernel3 = np.ones((3, 3), np.uint8)
         thresh_ROI_nn = cv2.dilate(thresh_ROI_nn, kernel3, iterations=int(ROIdilateindex))
+        if "CC_coordsmask" in session:
+            thresh_ROI_nn = cv2.bitwise_and(thresh_ROI_nn, thresh_ROI_nn, mask = session["CC_coordsmask"])
         session["CC_tresharray"][thresh_ROI_nn == 0] = 0
-        thresharray = session["CC_tresharray"]
         print('createdthreshROI_RC')
 
-        return thresh_ROI_nn, thresharray
+        return thresh_ROI_nn
 
     def createbg(self, bgindex):
         kernel = np.ones((3, 3), np.uint8)
@@ -204,30 +221,59 @@ class ClusterAnalysis:
             data.insert(0, '', "")
             session["CC_currentfileslist"].append(session["czifilename"])
 
-            summary = {'infoname': ["",
-                                    'number of clusters',
-                                    'mean area (px)',
-                                    'mean area (µm)',
-                                    'mean diameter (px)',
-                                    'mean diameter (µm)',
-                                    'mean intensity'],
-                       'info': ["",
-                                data['label'].max(),
-                                data['area'].mean(),
-                                data['area_sq_microns'].mean(),
-                                data['equivalent_diameter'].mean(),
-                                data['equivalent_diameter_microns'].mean(),
-                                data['mean_intensity'].mean()]}
-            summary = pd.DataFrame(data=summary)
-            summary.insert(0, '', "")
-            data = pd.concat([data, summary], axis=1)
+            if not session.get("CC_resetroi") and analysisoption == "0" and "CC_thresh_ROI_nn" in session:
+                markers = np.ones(session['CC_thresh_ROI_nn'].shape, dtype=np.uint8)
+                markers[session['CC_thresh_ROI_nn'] == 0] = 0
+                propsROI = measure.regionprops(markers, session["CC_clusterchannelarray"])
+                summary = {'infoname': ["",
+                                        'number of clusters',
+                                        'mean area (px)',
+                                        'mean area (µm)',
+                                        'mean diameter (px)',
+                                        'mean diameter (µm)',
+                                        'mean intensity',
+                                        'ROI area (px)',
+                                        'ROI area (µm)',
+                                        'ROI mean intensity'],
+                           'info': ["",
+                                    data['label'].max(),
+                                    data['area'].mean(),
+                                    data['area_sq_microns'].mean(),
+                                    data['equivalent_diameter'].mean(),
+                                    data['equivalent_diameter_microns'].mean(),
+                                    data['mean_intensity'].mean(),
+                                    propsROI[0].area,
+                                    propsROI[0].area * (float(pxum) ** 2),
+                                    propsROI[0].mean_intensity]}
+                summary = pd.DataFrame(data=summary)
+                summary.insert(0, '', "")
+                data = pd.concat([data, summary], axis=1)
+            else:
+                summary = {'infoname': ["",
+                                        'number of clusters',
+                                        'mean area (px)',
+                                        'mean area (µm)',
+                                        'mean diameter (px)',
+                                        'mean diameter (µm)',
+                                        'mean intensity'],
+                           'info': ["",
+                                    data['label'].max(),
+                                    data['area'].mean(),
+                                    data['area_sq_microns'].mean(),
+                                    data['equivalent_diameter'].mean(),
+                                    data['equivalent_diameter_microns'].mean(),
+                                    data['mean_intensity'].mean()]}
+                summary = pd.DataFrame(data=summary)
+                summary.insert(0, '', "")
+                data = pd.concat([data, summary], axis=1)
 
             print(data)
 
-            global globaldf
+
             session["CC_DataFrame"] = pd.concat([session["CC_DataFrame"], data], axis=1)
 
             print("added data")
+
         session["CC_watershedimage"] = watershedarray
         return watershedarray
 
@@ -250,7 +296,11 @@ class ClusterAnalysis:
         else:
             if ignoreif == '0':
                 session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+                session.pop("CC_coordsmask", None)
+            if not "CC_tresharray" in session:
+                session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
             session["CC_resetROI"] = True
+            session.pop("CC_thresh_ROI_nn", None)
             threshimage = self.arraytoimage(session["CC_tresharray"])
             return threshimage
 
@@ -258,6 +308,9 @@ class ClusterAnalysis:
         if session["CC_resetROI"]:
             (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
             session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+        if not "CC_tresharray" in session:
+            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+
         coordsnp = np.empty((0, 2), int)
 
         session["CC_resetROI"] = False
@@ -277,10 +330,14 @@ class ClusterAnalysis:
             (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
             if analysisoption == '1':
                 session["CC_tresharray"] = session["CC_clusterchannelarray8bit"]
+                print("thresharray set to clusterarray")
             else:
                 session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
+        if not "CC_tresharray" in session:
+            session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
         session["CC_aischannelarray8bit"] = self.createaischannel(aischannelindex)
-        (thresh_ROI_nn, session["CC_tresharray"]) = self.createthreshROI_RC(ROIdilateindex, ROIthreshindex, analysisoption, ROIgaussianindex)
+        thresh_ROI_nn = self.createthreshROI_RC(ROIdilateindex, ROIthreshindex, analysisoption, ROIgaussianindex)
+        session["CC_thresh_ROI_nn"] = thresh_ROI_nn
 
         session["CC_resetROI"] = False
         if viewroi:
@@ -337,11 +394,15 @@ class ClusterAnalysis:
         exceldf = io.BytesIO()
         session["CC_DataFrame"].to_excel(exceldf)
         exceldf.seek(0)  # may not be necessary?
+        if session["sessionname"] == "":
+            name = session["user"]
+        else:
+            name = session["sessionname"]
         return send_file(
             exceldf,
             mimetype='application/vnd.ms-excel',
             as_attachment=True,
-            attachment_filename= session["sessionname"]+'.xlsx',
+            attachment_filename= name+'.xlsx',
             cache_timeout=-1
         )
 

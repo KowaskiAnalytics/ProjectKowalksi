@@ -18,6 +18,7 @@ function updateWidth(){
 }
 var coords = [];
 $(document).ready(function() {
+    $(".anoptionsinput.initial").prop('checked',true)
     // Upload czi file to python backend
     $("#file_submit").click(function (event) {
 
@@ -88,12 +89,11 @@ $(document).ready(function() {
         var threshindex = $('#myRange').val();
         var clusterchannelindex = $('input[name="myRadio"]:checked').val();
         var donotcreatethresh = '0'
-        console.log(threshindex)
-        console.log(clusterchannelindex)
+        var analysisoption = $('input[name="myAN"]:checked').val();
 
         $.ajax({
             url: '/clustercounter/viewthreshimage',
-            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, checkbox:checkbox, donotcreatethresh:donotcreatethresh},
+            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, checkbox:checkbox, donotcreatethresh:donotcreatethresh, analysisoption:analysisoption},
             type: 'GET',
             contentType: "image/jpeg",
             success: function(result) {
