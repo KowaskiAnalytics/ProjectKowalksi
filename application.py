@@ -13,16 +13,21 @@ application.register_blueprint(clustercounter, url_prefix= "/clustercounter")
 
 application.secret_key = "OK_This_is_EPIC"
 
-application.config['SESSION_TYPE'] = 'redis'
-application.config['SESSION_PERMANENT'] = False
-application.config['SESSION_USE_SIGNER'] = True
-application.config['SESSION_REDIS'] = redis.from_url('redis://pk-cache.dgyphc.0001.euc1.cache.amazonaws.com:6379')
+#application.config['SESSION_TYPE'] = 'redis'
+#application.config['SESSION_PERMANENT'] = False
+#application.config['SESSION_USE_SIGNER'] = True
+# application.config['SESSION_REDIS'] = redis.from_url('redis://pk-cache.dgyphc.0001.euc1.cache.amazonaws.com:6379')
 # application.config['SESSION_REDIS'] = redis.from_url('redis:127.0.0.0:6379')
 
 server_session = Session(application)
 
 
 # Homepage
+
+@application.route("/comingsoon", methods= ["POST","GET"])
+def commingsoon():
+    return render_template("K2Studio.html")
+
 @application.route("/login", methods= ["POST","GET"])
 def login():
     if request.method == "POST":
@@ -40,15 +45,16 @@ def login():
 
 @application.route("/")
 def home():
-    if "user" in session:
-        if session["sessionname"] == "":
-            sessionID = session["user"]
-        else:
-            sessionID = session["sessionname"]
-
-        return render_template("homepage.html", data=sessionID)
-    else:
-        return redirect(url_for("login"))
+    return render_template("K2Studio.html")
+    # if "user" in session:
+    #     if session["sessionname"] == "":
+    #         sessionID = session["user"]
+    #     else:
+    #         sessionID = session["sessionname"]
+    #
+    #     return render_template("homepage.html", data=sessionID)
+    # else:
+    #     return redirect(url_for("login"))
 
 
 @application.route("/logout")
