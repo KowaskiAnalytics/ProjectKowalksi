@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, send_file, current_app, session, redirect, url_for
 import czifile
-from .clustercounter_backend import ClusterAnalysis
+from .clustercounter_backend_version2 import ClusterAnalysis
 import os
 import json
 import pandas as pd
@@ -78,8 +78,29 @@ def getmanualroi():
     coords = [int(x) for x in coords]
     print(coords)
     print(type(coords))
+    ifline = False
+    linewidth = False
     global clusteranalysis
-    return clusteranalysis.showcutthreshchannel(clusterchannelindex, threshindex, checkbox, coords, analysisoption)
+    return clusteranalysis.showcutthreshchannel(clusterchannelindex, threshindex, checkbox, coords, analysisoption, ifline, linewidth)
+
+@clustercounter.route("/getline", methods=["GET", "POST"])
+def getline():
+    threshindex = request.args["threshindex"]
+    clusterchannelindex = request.args["clusterchannelindex"]
+    checkbox = request.args["checkbox"]
+    coords = request.args["coords"]
+    analysisoption = request.args["analysisoption"]
+    linewidth = request.args["linewidth"]
+    print(threshindex)
+    print(clusterchannelindex)
+    try:
+        coords = coords.split(",")
+        coords = [int(x) for x in coords]
+    except:
+        coords = False
+    ifline = True
+    global clusteranalysis
+    return clusteranalysis.showcutthreshchannel(clusterchannelindex, threshindex, checkbox, coords, analysisoption, ifline, linewidth)
 
 
 @clustercounter.route("/viewroichannel", methods=["GET", "POST"])

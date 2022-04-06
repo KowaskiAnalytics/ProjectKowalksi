@@ -196,6 +196,38 @@ $(document).ready(function() {
             }
         });
     });
+    $('#submitlinebutton').on('click', function(){
+        $('div.ROIdots').remove();
+        $('#ManualROIButton').removeClass('active');
+        $('#ROIpanel1').slideUp(300, function() {
+                $(this).removeClass('active') });
+
+        if ($('#threshcheck').is(":checked")){
+            var checkbox = '1'
+        } else {
+            var checkbox = '0'
+        }
+        var threshindex = $('#myRange').val();
+        var clusterchannelindex = $('input[name="myRadio"]:checked').val();
+        var analysisoption = $('input[name="myAN"]:checked').val();
+        coords = coords + "";
+        var linewidth = $('#LineWidth').val();
+
+        $.ajax({
+            url: '/clustercounter/getline',
+            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, coords:coords, checkbox:checkbox, analysisoption:analysisoption, linewidth:linewidth},
+            type: 'GET',
+            contentType: "image/jpeg",
+            success: function(result) {
+                document.getElementById('selectedimg').src = 'data:image/jpeg;base64,'+ result;
+                $('#ManualROIButton').addClass('success')
+                setTimeout(function () {
+                    $('#ManualROIButton').removeClass('success');
+                }, 4000);
+            }
+        });
+    });
+
     $('#ROIChannelButton').click(function(){
         $('#ROIpanel2').slideDown(300, function() {
                 $(this).addClass('active');

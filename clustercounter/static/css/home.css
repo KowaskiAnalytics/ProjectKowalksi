@@ -490,7 +490,7 @@ header {
 
 #submitROIbutton{
     position: absolute;
-    right:5px;
+    right: 250px;
     height: 66px;
     width: 125px;
     background: transparent;
@@ -507,6 +507,38 @@ header {
     outline: none;
 }
 #submitROIbutton:hover{
+    color:#000000;
+    background-color:#e4e4f1;
+}
+
+#Linewidth{
+    display: flex;
+    color: #e4e4f1;
+    font-size: 20px;
+    text-align:center;
+    justify-content: center;
+    align-items: center;
+}
+
+#submitlinebutton{
+    position: absolute;
+    right:5px;
+    height: 66px;
+    width: 125px;
+    background: transparent;
+    margin: 7px 0 0 7px;
+    border:2px solid #e4e4f1;
+    border-radius:5px;
+    text-decoration:none;
+    font-size: 20px;
+    font-weight:500;
+    color:#e4e4f1;
+    text-align:center;
+    transition: all 0.2s;
+    cursor: pointer;
+    outline: none;
+}
+#submitlinebutton:hover{
     color:#000000;
     background-color:#e4e4f1;
 }
