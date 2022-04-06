@@ -54,6 +54,7 @@ class ClusterAnalysis:
         session.pop("CC_coordsmask", None)
         session.pop("CC_isline", None)
         session.pop("CC_linelength", None)
+        session.pop("CC_coordcache", None)
 
         session["CC_resetROI"] = True
 
@@ -142,18 +143,31 @@ class ClusterAnalysis:
         print("created thresh ROi")
 
     def createthreshLine(self, coordsnp, linewidth):
+        print(coordsnp)
+        if coordsnp == []:
+            coordsnp = session["CC_coordscache"]
+
         mask = np.zeros(session["CC_tresharray"].shape[0:2], dtype=np.uint8)
         mask = cv2.polylines(mask, [coordsnp], False, (255,255,255), int(linewidth))
-        cv2.imshow('kk', mask)
-        cv2.waitKey()
-        print(coordsnp)
+
 
         session["CC_tresharray"] = cv2.bitwise_and(session["CC_tresharray"], session["CC_tresharray"], mask=mask)
 
         session["CC_coordsmask"] = mask
+
+        background = copy.deepcopy(session["CC_clusterchannelarray8bit"])
+
+        contours, _ = cv2.findContours(mask,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        cv2.drawContours(background, contours, -1,(255,255,255),3)
+
         session["CC_isline"] = True
-        session["CC_linelength"] = self.finddistance(coordsnp)
+        session["CC_coordscache"] = coordsnp
+        session["CC_linelength"] = self.finddistance(coordsnp) + 2 * int(linewidth)
         print("created thresh line, Distance:", session["CC_linelength"])
+
+        return background
+
+
 
     def createthreshROI_RC(self, ROIdilateindex, ROIthreshindex, analysisoption, ROIgaussianindex):
         blurredROIarray = cv2.GaussianBlur(session["CC_aischannelarray8bit"], (0, 0), int(ROIgaussianindex))
@@ -290,14 +304,16 @@ class ClusterAnalysis:
                                         'mean area (µm)',
                                         'mean diameter (px)',
                                         'mean diameter (µm)',
-                                        'mean intensity'],
+                                        'mean intensity',
+                                        'area/length'],
                            'info': ["",
                                     data['label'].max(),
                                     data['area'].mean(),
                                     data['area_sq_microns'].mean(),
                                     data['equivalent_diameter'].mean(),
                                     data['equivalent_diameter_microns'].mean(),
-                                    data['mean_intensity'].mean()]}
+                                    data['mean_intensity'].mean(),
+                                    session['CC_linelength']]}
                 summary = pd.DataFrame(data=summary)
                 summary.insert(0, '', "")
                 data = pd.concat([data, summary], axis=1)
@@ -346,14 +362,20 @@ class ClusterAnalysis:
         if not "CC_tresharray" in session:
             session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
 
+        session["CC_resetROI"] = False
+
         coordsnp = np.empty((0, 2), int)
 
-        session["CC_resetROI"] = False
-        while (np.size(coords) > 0):
-            coordsnp = np.concatenate((coordsnp, [coords[0:2]]), axis=0)
-            coords = np.delete(coords, [0, 1])
+        if not coords:
+            coordsnp = []
+        else:
+            while (np.size(coords) > 0):
+                coordsnp = np.concatenate((coordsnp, [coords[0:2]]), axis=0)
+                coords = np.delete(coords, [0, 1])
         if ifline:
-            self.createthreshLine(coordsnp,linewidth)
+            special = self.createthreshLine(coordsnp,linewidth)
+            special = self.arraytoimage(special)
+            return special
         else:
             self.createthreshROI(coordsnp, analysisoption)
 
