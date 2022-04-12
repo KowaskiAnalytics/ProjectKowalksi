@@ -489,7 +489,7 @@ header {
 }
 
 #submitROIbutton{
-    position: absolute;
+    display: flex;
     right: 250px;
     height: 66px;
     width: 125px;
@@ -521,8 +521,7 @@ header {
 }
 
 #submitlinebutton{
-    position: absolute;
-    right:5px;
+    display: flex;
     height: 66px;
     width: 125px;
     background: transparent;
