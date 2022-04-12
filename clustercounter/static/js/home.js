@@ -161,7 +161,7 @@ $(document).ready(function() {
                 width: '5px',
                 height: '5px',
                 borderRadius:'50%',
-                background: 'rgba(76, 36, 115)',
+                background: 'rgb(243,99,179)',
             })
             );
         }
