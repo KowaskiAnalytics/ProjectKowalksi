@@ -60,7 +60,7 @@ class ClusterAnalysis:
 
         return image
 
-    def finddistance(self, points):
+    def finddistance(self, points, maxlength):
         summarize = []
 
         for index, point in enumerate(points):
@@ -74,9 +74,25 @@ class ClusterAnalysis:
                 distance = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
                 summarize.append(distance)
 
+                if maxlength != 0 and sum(summarize)>maxlength:
+                    Dperc = (maxlength - sum(summarize[:index]))/distance
+                    print(Dperc)
+                    newx = x1 + (Dperc * (x2-x1))
+                    newy = y1 + (Dperc * (y2-y1))
+
+                    print(round(newx),round(newy))
+
+                    points[index+1]=[round(newx),round(newy)]
+                    points = points[:index+2]
+                    print(points)
+
+                    return maxlength, points
+
+
+
         totaldistance = sum(summarize)
 
-        return totaldistance
+        return totaldistance, points
 
     def arraytoimage(self, array):
         clusterarrayimage = Image.fromarray(array)
@@ -142,10 +158,14 @@ class ClusterAnalysis:
         session["CC_coordsmask"] = mask
         print("created thresh ROi")
 
-    def createthreshLine(self, coordsnp, linewidth):
+    def createthreshLine(self, coordsnp, linewidth, maxline):
         print(coordsnp)
         if coordsnp == []:
             coordsnp = session["CC_coordscache"]
+        print(maxline)
+        if maxline != 0:
+            maxline = maxline - float(linewidth)
+            maxline, coordsnp = self.finddistance(coordsnp, maxline)
 
         mask = np.zeros(session["CC_tresharray"].shape[0:2], dtype=np.uint8)
         mask = cv2.polylines(mask, [coordsnp], False, (255,255,255), int(linewidth))
@@ -162,7 +182,8 @@ class ClusterAnalysis:
 
         session["CC_isline"] = True
         session["CC_coordscache"] = coordsnp
-        session["CC_linelength"] = self.finddistance(coordsnp) + 2 * int(linewidth)
+        length, redact = self.finddistance(coordsnp, 0)
+        session["CC_linelength"] = length + float(linewidth)
         print("created thresh line, Distance:", session["CC_linelength"])
 
         return background
@@ -355,7 +376,7 @@ class ClusterAnalysis:
             threshimage = self.arraytoimage(session["CC_tresharray"])
             return threshimage
 
-    def showcutthreshchannel(self, clusterchannelindex, threshindex, checkbox, coords, analysisoption, ifline, linewidth):
+    def showcutthreshchannel(self, clusterchannelindex, threshindex, checkbox, coords, analysisoption, ifline, linewidth, maxline):
         if session["CC_resetROI"]:
             (session["CC_clusterchannelarray"], session["CC_clusterchannelarray8bit"]) = self.createclusterchannel(clusterchannelindex)
             session["CC_tresharray"] = self.createthresh(threshindex, checkbox)
@@ -373,7 +394,7 @@ class ClusterAnalysis:
                 coordsnp = np.concatenate((coordsnp, [coords[0:2]]), axis=0)
                 coords = np.delete(coords, [0, 1])
         if ifline:
-            special = self.createthreshLine(coordsnp,linewidth)
+            special = self.createthreshLine(coordsnp,linewidth, float(maxline))
             special = self.arraytoimage(special)
             return special
         else:

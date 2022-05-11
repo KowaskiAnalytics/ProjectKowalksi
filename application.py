@@ -13,11 +13,11 @@ application.register_blueprint(clustercounter, url_prefix= "/clustercounter")
 
 application.secret_key = "OK_This_is_EPIC"
 
-application.config['SESSION_TYPE'] = 'redis'
-application.config['SESSION_PERMANENT'] = False
-application.config['SESSION_USE_SIGNER'] = True
+application.config['SESSION_TYPE'] = 'filesystem'
+# application.config['SESSION_PERMANENT'] = False
+# application.config['SESSION_USE_SIGNER'] = True
 # application.config['SESSION_REDIS'] = redis.from_url('redis://pk-cache.dgyphc.0001.euc1.cache.amazonaws.com:6379')
-application.config['SESSION_REDIS'] = redis.from_url('redis:127.0.0.0:6379')
+# application.config['SESSION_REDIS'] = redis.from_url('redis:127.0.0.0:6379')
 
 server_session = Session(application)
 

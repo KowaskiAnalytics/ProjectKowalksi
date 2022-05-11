@@ -80,8 +80,9 @@ def getmanualroi():
     print(type(coords))
     ifline = False
     linewidth = False
+    maxline = False
     global clusteranalysis
-    return clusteranalysis.showcutthreshchannel(clusterchannelindex, threshindex, checkbox, coords, analysisoption, ifline, linewidth)
+    return clusteranalysis.showcutthreshchannel(clusterchannelindex, threshindex, checkbox, coords, analysisoption, ifline, linewidth, maxline)
 
 @clustercounter.route("/getline", methods=["GET", "POST"])
 def getline():
@@ -91,6 +92,7 @@ def getline():
     coords = request.args["coords"]
     analysisoption = request.args["analysisoption"]
     linewidth = request.args["linewidth"]
+    maxline = request.args ["maxline"]
     print(threshindex)
     print(clusterchannelindex)
     try:
@@ -100,7 +102,7 @@ def getline():
         coords = False
     ifline = True
     global clusteranalysis
-    return clusteranalysis.showcutthreshchannel(clusterchannelindex, threshindex, checkbox, coords, analysisoption, ifline, linewidth)
+    return clusteranalysis.showcutthreshchannel(clusterchannelindex, threshindex, checkbox, coords, analysisoption, ifline, linewidth, maxline)
 
 
 @clustercounter.route("/viewroichannel", methods=["GET", "POST"])

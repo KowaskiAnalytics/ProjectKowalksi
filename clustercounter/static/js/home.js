@@ -212,10 +212,11 @@ $(document).ready(function() {
         var analysisoption = $('input[name="myAN"]:checked').val();
         coords = coords + "";
         var linewidth = $('#LineWidth').val();
+        var maxline = $('#maxlineinput').val();
 
         $.ajax({
             url: '/clustercounter/getline',
-            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, coords:coords, checkbox:checkbox, analysisoption:analysisoption, linewidth:linewidth},
+            data: {threshindex:threshindex, clusterchannelindex:clusterchannelindex, coords:coords, checkbox:checkbox, analysisoption:analysisoption, linewidth:linewidth, maxline:maxline},
             type: 'GET',
             contentType: "image/jpeg",
             success: function(result) {
